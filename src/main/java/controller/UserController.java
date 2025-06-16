@@ -88,6 +88,39 @@ public class UserController {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
     }
+    
+    @GET
+    @Path("correo/{correo}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUsuarioByCorreo(@PathParam("correo") String correo) {
+        System.out.println(correo);
+        Usuario usuario = null;
+        
+        try {
+            
+            ResultSet respuesta = UsuarioDao.getUsuarioByCorreo(correo);
+            
+            while (respuesta.next()) { 
+                usuario = new Usuario(
+                    respuesta.getInt("id"),
+                    respuesta.getString("nombre"),
+                    respuesta.getString("apellido"),
+                    respuesta.getString("correo"),
+                    respuesta.getString("contrasean"),
+                    respuesta.getInt("genero_id"),
+                    respuesta.getInt("ciudad_id"),
+                    respuesta.getInt("estado_id")
+                );
+            }
+            
+            respuesta.close();
+            
+            return Response.ok(usuario).build();
+            
+        } catch (SQLException e) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+    }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)

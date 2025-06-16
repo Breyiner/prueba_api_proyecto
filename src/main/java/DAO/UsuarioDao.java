@@ -43,6 +43,24 @@ public class UsuarioDao {
             return null;
         }
     }
+    
+    public static ResultSet getUsuarioByCorreo(String correo) {
+        
+        Connection connection = conn.connect();
+        
+        try {
+            
+            PreparedStatement pstm = connection.prepareStatement("SELECT * FROM usuarios WHERE correo = ?");
+            pstm.setString(1, correo);
+            ResultSet respuesta = pstm.executeQuery();
+            
+            return respuesta;
+            
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
    
     public static ResultSet createUsuario(Usuario usuarioData) {
         
