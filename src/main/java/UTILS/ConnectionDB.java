@@ -3,12 +3,13 @@ package UTILS;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import io.github.cdimascio.dotenv.Dotenv;
 
 public class ConnectionDB {
     
     String userName = "root";
-    String password = "Breyner.051207";
-    String url = "jdbc:mysql://localhost:3306/proyecto";
+    String password = "#Aprendiz2024";
+    String url = "jdbc:mysql://localhost:3306/prueba";
     
     
     public Connection connect() {
