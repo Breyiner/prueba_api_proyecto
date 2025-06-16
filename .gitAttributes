@@ -1,0 +1,7 @@
+# Manejo automático de finales de línea según el sistema operativo
+* text=auto
+
+# Opcional: evita que archivos binarios sean modificados
+*.jar binary
+*.war binary
+*.class binary
