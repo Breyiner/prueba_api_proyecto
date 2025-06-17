@@ -88,6 +88,7 @@ public class UsuarioDao {
             return generatedKeys;
             
         } catch (SQLException e) {
+            System.out.println(e.getMessage());
             return null;
         }
     }
@@ -133,7 +134,6 @@ public class UsuarioDao {
             return affectedRows;
             
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
             return 0;
         }
     }
