@@ -3,77 +3,79 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion> <!-- Versión del modelo POM -->
 
-  <groupId>com.mycompany</groupId>
-  <artifactId>pruebaapi</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <packaging>war</packaging>
+  <groupId>api_proyecto</groupId> <!-- Identificador único del grupo o empresa -->
+  <artifactId>pruebaapi</artifactId> <!-- Identificador único del artefacto (proyecto) -->
+  <version>1.0-SNAPSHOT</version> <!-- Versión del artefacto -->
+  <packaging>war</packaging> <!-- Tipo de empaquetado, en este caso un archivo WAR -->
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>21</maven.compiler.source>
-    <maven.compiler.target>21</maven.compiler.target>
-    <jersey.version>2.41</jersey.version> <!-- Última compatible con Java EE 7 -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> <!-- Codificación de caracteres del proyecto -->
+    <maven.compiler.source>21</maven.compiler.source> <!-- Versión de Java para la compilación -->
+    <maven.compiler.target>21</maven.compiler.target> <!-- Versión de Java para el bytecode generado -->
+    <jersey.version>2.41</jersey.version> <!-- Versión de Jersey utilizada -->
   </properties>
 
   <dependencies>
+    <!-- Dependencias del proyecto -->
+    
     <!-- Jersey core para Java EE 7 (usa javax.*) -->
     <dependency>
       <groupId>org.glassfish.jersey.containers</groupId>
       <artifactId>jersey-container-servlet</artifactId>
-      <version>${jersey.version}</version>
+      <version>${jersey.version}</version> <!-- Usa la versión definida en propiedades -->
     </dependency>
 
     <dependency>
       <groupId>org.glassfish.jersey.media</groupId>
       <artifactId>jersey-media-json-jackson</artifactId>
-      <version>${jersey.version}</version>
+      <version>${jersey.version}</version> <!-- Usa la versión definida en propiedades -->
     </dependency>
 
     <dependency>
       <groupId>org.glassfish.jersey.inject</groupId>
-      <artifactId>jersey-hk2</artifactId> <!-- ✅ Agrega esta -->
-      <version>${jersey.version}</version>
+      <artifactId>jersey-hk2</artifactId> <!-- Dependencia para la inyección de dependencias -->
+      <version>${jersey.version}</version> <!-- Usa la versión definida en propiedades -->
     </dependency>
 
     <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
-      <version>8.0.33</version>
+      <version>8.0.33</version> <!-- Conector JDBC para MySQL -->
     </dependency>
 
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
-      <version>3.1.0</version>
-      <scope>provided</scope>
+      <version>3.1.0</version> <!-- API de servlets -->
+      <scope>provided</scope> <!-- Indica que la implementación será proporcionada por el contenedor -->
     </dependency>
 
     <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>javax.ws.rs-api</artifactId>
-      <version>2.1</version>
-      <scope>provided</scope>
+      <version>2.1</version> <!-- API de JAX-RS -->
+      <scope>provided</scope> <!-- Indica que la implementación será proporcionada por el contenedor -->
     </dependency>
     
     <dependency>
         <groupId>io.github.cdimascio</groupId>
         <artifactId>java-dotenv</artifactId>
-        <version>5.2.2</version>
+        <version>5.2.2</version> <!-- Biblioteca para manejar variables de entorno desde un archivo .env -->
      </dependency>
 
   </dependencies>
 
   <build>
-    <finalName>api-rest</finalName>
+    <finalName>api-rest</finalName> <!-- Nombre final del archivo WAR generado -->
     <plugins>
       <!-- Plugin de compilación para WAR -->
       <plugin>
         <artifactId>maven-war-plugin</artifactId>
-        <version>3.4.0</version>
+        <version>3.4.0</version> <!-- Versión del plugin -->
         <configuration>
-          <failOnMissingWebXml>false</failOnMissingWebXml>
+          <failOnMissingWebXml>false</failOnMissingWebXml> <!-- Configuración para no fallar si no hay web.xml -->
         </configuration>
       </plugin>
     </plugins>
