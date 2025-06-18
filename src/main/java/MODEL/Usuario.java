@@ -7,7 +7,7 @@ package MODEL; // Paquete que contiene las clases de modelo de la aplicación
  */
 public class Usuario {
 
-    private int id; // Identificador único del usuario
+    private int id; // Identificador tipo entero único del usuario
     private String nombre; // Nombre del usuario
     private String apellido; // Apellido del usuario
     private String correo; // Correo electrónico del usuario

@@ -2,6 +2,7 @@ package CONTROLLER; // Paquete que contiene el controlador de usuarios
 
 import DAO.UsuarioDao; // Importa la clase UsuarioDao que maneja la interacción con la base de datos
 import MODEL.Usuario; // Importa la clase Usuario que representa la entidad de usuario
+import PROVIDERS.ResponseProvider;
 import java.sql.ResultSet; // Importa la clase ResultSet para manejar los resultados de las consultas SQL
 import java.sql.SQLException; // Importa la clase SQLException para manejar errores de SQL
 import java.util.ArrayList; // Importa la clase ArrayList para crear listas dinámicas
@@ -38,33 +39,33 @@ public class UserController {
         try {
             // Ejecuta la consulta para obtener todos los usuarios mediante la capa DAO
             ResultSet respuesta = UsuarioDao.getUsuarios();
-            
-            // Recorre cada fila resultado de la consulta
-            while (respuesta.next()) {     
+            while (respuesta.next()) { // Cambia esto a un while
                 // Crea un objeto Usuario con los datos de cada fila
                 Usuario usuario = new Usuario(
-                    Integer.parseInt(respuesta.getString("id")), // Obtiene y convierte el ID del usuario a entero
-                    respuesta.getString("nombre"), // Obtiene el nombre del usuario
-                    respuesta.getString("apellido"), // Obtiene el apellido del usuario
-                    respuesta.getString("correo"), // Obtiene el correo electrónico del usuario
-                    respuesta.getString("contrasean"), // Obtiene la contraseña del usuario
-                    Integer.parseInt(respuesta.getString("genero_id")), // Obtiene el ID del género del usuario
-                    Integer.parseInt(respuesta.getString("ciudad_id")), // Obtiene el ID de la ciudad del usuario
-                    Integer.parseInt(respuesta.getString("estado_id")) // Obtiene el ID del estado del usuario
+                    respuesta.getInt("id"),
+                    respuesta.getString("nombre"),
+                    respuesta.getString("apellido"),
+                    respuesta.getString("correo"),
+                    respuesta.getString("contrasean"),
+                    Integer.parseInt(respuesta.getString("genero_id")),
+                    Integer.parseInt(respuesta.getString("ciudad_id")),
+                    Integer.parseInt(respuesta.getString("estado_id"))
                 );
                 // Añade el objeto Usuario a la lista de usuarios
                 usuarios.add(usuario);
             }
-            
             // Cierra el ResultSet para liberar recursos
             respuesta.close();
-            
-            // Devuelve la lista de usuarios con estado 200 OK
-            return Response.ok(usuarios).build();
+            // Devuelve la lista de usuarios con estado 200 OK si hay usuarios
+            if (!usuarios.isEmpty()) {
+                return ResponseProvider.success(usuarios, "Usuarios obtenidos con éxito.", 200);
+            } else {
+                return ResponseProvider.error("No hay usuarios registrados.", 404);
+            }
             
         } catch (SQLException e) {
-            // Si ocurre un error en la consulta, devuelve un estado 404 Not Found
-            return Response.status(Response.Status.NOT_FOUND).build();
+            // Si ocurre un error en la consulta, devuelve un estado 500
+            return ResponseProvider.error("Error al obtener los usuarios", 500);
         }
     }
     
@@ -104,12 +105,16 @@ public class UserController {
             // Cierra el ResultSet para liberar recursos
             respuesta.close();
             
-            // Devuelve el usuario encontrado, o null si no existe
-            return Response.ok(usuario).build(); // Devuelve el usuario con código 200 OK
+            // Devuelve el usuario con estado 200 OK si hay usuarios
+            if (usuario == null) {
+                return ResponseProvider.error("El usuario no existe.", 404);
+            } else {
+                return ResponseProvider.success(usuario, "Usuario obtenido con éxito.", 200);
+            }
             
         } catch (SQLException e) {
-            // En caso de error o si no se encuentra el usuario, responde con 404 Not Found
-            return Response.status(Response.Status.NOT_FOUND).build();
+            // Si ocurre un error en la consulta, devuelve un estado 500
+            return ResponseProvider.error("Error al obtener los usuarios", 500);
         }
     }
     
@@ -151,12 +156,16 @@ public class UserController {
             // Cierra el conjunto de resultados para optimizar recursos
             respuesta.close();
             
-            // Retorna el usuario encontrado o null si no hubo coincidencias
-            return Response.ok(usuario).build(); // Devuelve el usuario en formato JSON
+            // Devuelve la lista de usuarios con estado 200 OK si hay usuarios
+            if (usuario == null) {
+                return ResponseProvider.error("El usuario no existe.", 404);
+            } else {
+                return ResponseProvider.success(usuario, "Usuario obtenido con éxito.", 200);
+            }
             
         } catch (SQLException e) {
-            // Si ocurre un error o no se encuentra el usuario, indica no encontrado
-            return Response.status(Response.Status.NOT_FOUND).build();
+            // Si ocurre un error en la consulta, devuelve un estado 500
+            return ResponseProvider.error("Error al obtener los usuarios", 500);
         }
     }
 

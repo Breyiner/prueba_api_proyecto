@@ -29,7 +29,7 @@ public class UsuarioDao {
             return respuesta; // Devuelve el ResultSet con los usuarios
             
         } catch (SQLException e) {
-            return null; // Devuelve null si ocurre un error en la consulta
+            throw new Error("Error al obtener los usuarios"); // Devuelve null si ocurre un error en la consulta
         }
     }
     
@@ -53,7 +53,7 @@ public class UsuarioDao {
             return respuesta; // Devuelve el ResultSet con el usuario encontrado
             
         } catch (SQLException e) {
-            return null; // Devuelve null si ocurre un error en la consulta
+            throw new Error("Error al obtener el usuario");
         }
     }
     
@@ -77,8 +77,7 @@ public class UsuarioDao {
             return respuesta; // Devuelve el ResultSet con el usuario encontrado
             
         } catch (SQLException e) {
-            System.out.println(e.getMessage()); // Imprime el mensaje de error en la consola
-            return null; // Devuelve null si ocurre un error en la consulta
+            throw new Error("Error al obtener los usuarios");
         }
     }
    

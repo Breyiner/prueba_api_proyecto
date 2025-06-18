@@ -12,8 +12,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> <!-- Codificación de caracteres del proyecto -->
-    <maven.compiler.source>21</maven.compiler.source> <!-- Versión de Java para la compilación -->
-    <maven.compiler.target>21</maven.compiler.target> <!-- Versión de Java para el bytecode generado -->
+    <maven.compiler.source>16</maven.compiler.source> <!-- Versión de Java para la compilación -->
+    <maven.compiler.target>16</maven.compiler.target> <!-- Versión de Java para el bytecode generado -->
     <jersey.version>2.41</jersey.version> <!-- Versión de Jersey utilizada -->
   </properties>
 
