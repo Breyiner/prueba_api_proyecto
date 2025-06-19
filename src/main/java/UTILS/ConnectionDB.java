@@ -13,7 +13,7 @@ public class ConnectionDB {
     // Credenciales y URL de conexión a la base de datos
     String userName = "root"; // Nombre de usuario para la base de datos
     String password = "#Aprendiz2024"; // Contraseña para la base de datos
-    String url = "jdbc:mysql://localhost:3306/prueba"; // URL de conexión a la base de datos
+    String url = "jdbc:mysql://localhost:3306/proyecto_finanzas"; // URL de conexión a la base de datos
 
     /**
      * Método para establecer una conexión con la base de datos.

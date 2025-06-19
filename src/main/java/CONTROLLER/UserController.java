@@ -34,7 +34,7 @@ public class UserController {
     @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
     public Response getUsuarios() {
         
-        List<Usuario> usuarios = new ArrayList<Usuario>(); // Crea una lista para almacenar los usuarios recuperados
+        List<Usuario> usuarios = new ArrayList<>(); // Crea una lista para almacenar los usuarios recuperados
         
         try {
             // Ejecuta la consulta para obtener todos los usuarios mediante la capa DAO
@@ -105,7 +105,7 @@ public class UserController {
             // Cierra el ResultSet para liberar recursos
             respuesta.close();
             
-            // Devuelve el usuario con estado 200 OK si hay usuarios
+            // Devuelve el usuario con estado 200 OK si existe
             if (usuario == null) {
                 return ResponseProvider.error("El usuario no existe.", 404);
             } else {
@@ -114,7 +114,7 @@ public class UserController {
             
         } catch (SQLException e) {
             // Si ocurre un error en la consulta, devuelve un estado 500
-            return ResponseProvider.error("Error al obtener los usuarios", 500);
+            return ResponseProvider.error("Error interno al obtener los usuarios", 500);
         }
     }
     
@@ -156,7 +156,7 @@ public class UserController {
             // Cierra el conjunto de resultados para optimizar recursos
             respuesta.close();
             
-            // Devuelve la lista de usuarios con estado 200 OK si hay usuarios
+            // Devuelve el usuario con estado 200 OK si existe
             if (usuario == null) {
                 return ResponseProvider.error("El usuario no existe.", 404);
             } else {
@@ -165,7 +165,7 @@ public class UserController {
             
         } catch (SQLException e) {
             // Si ocurre un error en la consulta, devuelve un estado 500
-            return ResponseProvider.error("Error al obtener los usuarios", 500);
+            return ResponseProvider.error("Error interno al obtener los usuarios", 500);
         }
     }
 
@@ -184,21 +184,35 @@ public class UserController {
     public Response createUsuario(Usuario usuarioData) {
         
         try {
+            
+            Response usuarioExistente = this.getUsuarioByCorreo(usuarioData.getCorreo());
+            
+            if (usuarioExistente.getStatus() == 200) return ResponseProvider.error("Este correo ya fué registrado.", 409);
+            
             int idGenerado = 0; // Inicializa variable para almacenar el ID generado
             
             // Inserta el nuevo usuario en la base de datos y obtiene el último ID generado
             ResultSet ultimoRegistro = UsuarioDao.createUsuario(usuarioData);
             
             // Si la inserción fue exitosa, asigna el ID generado al objeto usuario
-            if (ultimoRegistro.next()) idGenerado = ultimoRegistro.getInt(1);
-            usuarioData.setId(idGenerado); // Asigna el ID al objeto usuario
+            while (ultimoRegistro.next()) {
+                idGenerado = ultimoRegistro.getInt(1);
+                usuarioData.setId(idGenerado); // Asigna el ID al objeto usuario
+            }
             
-            // Retorna el nuevo usuario con estado 201 Created
-            return Response.status(Response.Status.CREATED).entity(usuarioData).build();
+            // Cierra el conjunto de resultados para optimizar recursos
+            ultimoRegistro.close();
+            
+            // Devuelve el usuario con estado 200 OK si se crea con exito
+            if (idGenerado == 0) {
+                return ResponseProvider.error("Error al crear el usuario.", 400);
+            } else {
+                return ResponseProvider.success(usuarioData, "Usuario creado con éxito.", 200);
+            }
             
         } catch (SQLException e) {
-            // En caso de error durante la inserción, responde con error 500 Internal Server Error
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            // Si ocurre un error en la consulta, devuelve un estado 500
+            return ResponseProvider.error("Error interno al crear el usuario.", 500);
         }
     }
     
@@ -219,21 +233,54 @@ public class UserController {
     public Response updateUsuario(@PathParam("id") int id, Usuario usuarioData) {
      
        try {
+           
+           Response usuarioExistente = this.getUsuario(id);
+            
+           if (usuarioExistente.getStatus() == 404) return ResponseProvider.error("Este usuario no existe.", 404);
+           
+ 
+           if(existEmail(id, usuarioData)) return ResponseProvider.error("Este correo ya fué registrado.", 409);
+           
             // Intenta actualizar el usuario en la base de datos y devuelve el número de filas afectadas
             int rowsAffected = UsuarioDao.updateUsuario(id, usuarioData);
             
-            if (rowsAffected != 0) 
+            if (rowsAffected != 0){
+                
+                usuarioData.setId(id);
                 // Si la actualización se realizó, se confirma el éxito con código 200 OK
-                return Response.ok("Usuario actualizado con éxito").build();
+                return ResponseProvider.success(usuarioData, "Usuario actualizado con éxito.", 200);
+            }
             else 
-                // Si no encontró usuario para actualizar, devuelve 404 Not Found con mensaje
-                return Response.status(Response.Status.NOT_FOUND).entity("Usuario no encontrado").build();
+                return ResponseProvider.error("Error al actualizar el usuario.", 400);
             
         } catch (Exception e) {
             // Captura cualquier problema interno y devuelve un error 500 con mensaje
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error interno del servidor").build();
+            return ResponseProvider.error("Error interno al actualizar el usuario.", 500);
         }
     }
+    
+    private boolean existEmail(int id, Usuario usuarioData) {
+        
+        boolean valido = false;
+        
+        try {
+            // Ejecuta la consulta para obtener todos los usuarios mediante la capa DAO
+            ResultSet respuesta = UsuarioDao.getUsuarios();
+            while (respuesta.next()) { // Cambia esto a un while
+                
+                if(respuesta.getInt("id") != id && usuarioData.getCorreo().equals(respuesta.getString("correo"))) valido = true;
+
+            }
+            // Cierra el ResultSet para liberar recursos
+            respuesta.close();
+            
+            return valido;
+            
+        } catch (SQLException e) {
+            throw new Error("Error al validar si el correo existe");
+        }
+    }
+    
 
     /**
      * Método para eliminar un usuario a partir de su ID.
@@ -250,19 +297,20 @@ public class UserController {
     public Response deleteUsuario(@PathParam("id") int id) {
      
         try {
+            
             // Ejecuta la eliminación de usuario en la base de datos y recibe la cantidad de filas afectadas
             int rowsAffected = UsuarioDao.deleteUsuario(id);
             
             if (rowsAffected != 0) 
                 // Si usuario eliminado correctamente, devuelve código 204 No Content con mensaje
-                return Response.status(Response.Status.NO_CONTENT).entity("Usuario eliminado").build();
+                return ResponseProvider.success(null, "Usuario eliminado con éxito.", 200);
             else 
                 // Si no encontró usuario para eliminar, devuelve 404 Not Found con mensaje
-                return Response.status(Response.Status.NOT_FOUND).entity("Usuario no encontrado").build();
+                return ResponseProvider.error("Este usuario no existe.", 404);
             
         } catch (Exception e) {
             // Para cualquier error interno, retorna un error 500 con mensaje
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error interno del servidor").build();
+            return ResponseProvider.error("Error interno al eliminar el usuario.", 500);
         }
     }
 }

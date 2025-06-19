@@ -116,8 +116,7 @@ public class UsuarioDao {
             return generatedKeys; // Devuelve el ResultSet con las claves generadas
             
         } catch (SQLException e) {
-            System.out.println(e.getMessage()); // Imprime el mensaje de error en la consola
-            return null; // Devuelve null si ocurre un error en la inserción
+            throw new Error("Error al crear el usuario");
         }
     }
     
@@ -155,7 +154,7 @@ public class UsuarioDao {
             return affectedRow; // Devuelve el número de filas afectadas
             
         } catch (SQLException e) {
-            return 0; // Devuelve 0 si ocurre un error en la actualización
+            throw new Error("Error al actualizar el usuario");
         }
     }
     
@@ -179,7 +178,7 @@ public class UsuarioDao {
             return affectedRows; // Devuelve el número de filas afectadas
             
         } catch (SQLException e) {
-            return 0; // Devuelve 0 si ocurre un error en la eliminación
+            throw new Error("Error al eliminar el usuario");
         }
     }
 }

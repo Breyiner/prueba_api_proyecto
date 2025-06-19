@@ -21,6 +21,7 @@ public class ResponseProvider {
                 .build();
     }
 }
+
 class ResponseMessage {
     private boolean success;
     private int code;
@@ -33,6 +34,7 @@ class ResponseMessage {
         this.message = message;
         this.data = data;
     }
+
     // Getters y setters
 
     public boolean isSuccess() {
