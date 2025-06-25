@@ -10,18 +10,18 @@ import java.sql.SQLException; // Importa la clase SQLException para manejar erro
  */
 public class ConnectionDB {
     
-    // Credenciales y URL de conexión a la base de datos
-    String userName = "root"; // Nombre de usuario para la base de datos
-    String password = "Breyner.051207"; // Contraseña para la base de datos
-    String url = "jdbc:mysql://localhost:3306/proyecto"; // URL de conexión a la base de datos
 
     /**
      * Método para establecer una conexión con la base de datos.
      * 
      * @return Connection objeto que representa la conexión a la base de datos o null si falla
      */
-    public Connection connect() {
+    public static Connection connect() {
         
+        // Credenciales y URL de conexión a la base de datos
+        String userName = "root"; // Nombre de usuario para la base de datos
+        String password = "#Aprendiz2024"; // Contraseña para la base de datos
+        String url = "jdbc:mysql://localhost:3306/prueba"; // URL de conexión a la base de datos
         Connection connection = null; // Inicializa la conexión como null
         
         try {
