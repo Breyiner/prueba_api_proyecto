@@ -1,4 +1,4 @@
-package FILTERS; // Paquete que contiene los filtros de la aplicación
+package CONFIG; // Paquete que contiene los filtros de la aplicación
 
 import javax.ws.rs.container.ContainerResponseFilter; // Importa la interfaz para filtrar respuestas de contenedores
 import javax.ws.rs.container.ContainerRequestContext; // Importa la clase para manejar el contexto de la solicitud
