@@ -57,7 +57,7 @@ public class UserController {
 
 
     @POST // Indica que este método responde a solicitudes POST
-    @Validar
+    @Validar(entidad = "Usuario")
     @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
     @Consumes(MediaType.APPLICATION_JSON) // Indica que el método acepta datos en formato JSON
     public Response createUsuario(Usuario usuarioData) {

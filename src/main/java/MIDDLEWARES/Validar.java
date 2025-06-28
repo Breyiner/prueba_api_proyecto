@@ -11,5 +11,6 @@ import static java.lang.annotation.ElementType.TYPE;
 @Retention(RetentionPolicy.RUNTIME) // Disponible en tiempo de ejecución
 @Target({TYPE, METHOD}) // Puede aplicarse a clases y métodos
 public @interface Validar {
+    String entidad();
 }
 

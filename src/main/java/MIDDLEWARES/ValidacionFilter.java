@@ -1,5 +1,6 @@
 package MIDDLEWARES;
 
+import PROVIDERS.ResponseProvider;
 import java.io.IOException;
 import javax.ws.rs.container.*;
 import javax.ws.rs.core.*;
@@ -18,18 +19,30 @@ public class ValidacionFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext requestContext) throws IOException {
         // Obtener el método del controlador que se está ejecutando
         Method metodo = resourceInfo.getResourceMethod();
+        
         // Verificar si tiene la anotación @Validar
         if (metodo.isAnnotationPresent(Validar.class)) {
             
-//             Leer el JSON del request y convertirlo a la clase especificada
+            // Se obtiene la anotacion
+            Validar anotacion = metodo.getAnnotation(Validar.class);
+            
+            // Leer el JSON del request y convertirlo a String
             String data = new String(requestContext.getEntityStream().readAllBytes());
+            
+            // El json del request convetido en String se convierte en un JSONObject para poder recorrerlo
             JSONObject jsonData = new JSONObject(data);
-//             Validar el objeto
-            List<String> errores = ValidarCampos.validar(jsonData);
+            
+            // obtenemos la entidad proveniente de la anotacion
+            String entidad = anotacion.entidad();
+            
+            List<Campo> campos = ObtenerCampos.obtener(entidad);
+            
+            
+            // Validar el objeto
+            List<String> errores = ValidarCampos.validar(jsonData, campos);
             if (!errores.isEmpty()) {
                 requestContext.abortWith(
-                    Response.ok("puto")
-                        .build()
+                        ResponseProvider.error("Error al momento de validar los datos", 400, errores)
                 );
             }
             

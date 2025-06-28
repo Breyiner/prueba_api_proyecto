@@ -1,5 +1,6 @@
 package PROVIDERS;
 
+import java.util.List;
 import javax.ws.rs.core.Response;
 
 public class ResponseProvider {
@@ -12,6 +13,12 @@ public class ResponseProvider {
     public static Response error(String message, int status) {
         return Response.status(status)
                 .entity(new ResponseMessage(false, status, message, null))
+                .build();
+    }
+    
+    public static Response error(String message, int status, List<String> errores) {
+        return Response.status(status)
+                .entity(new ResponseMessage(false, status, message, errores))
                 .build();
     }
     
