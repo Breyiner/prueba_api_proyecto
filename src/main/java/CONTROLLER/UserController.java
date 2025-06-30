@@ -44,19 +44,8 @@ public class UserController {
     }
     
 
-    @GET // Indica que este método responde a solicitudes GET
-    @Path("correo/{correo}") // La ruta incluye el correo a buscar
-    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
-    public Response getUsuarioByCorreo(@PathParam("correo") String correo) {
-        try {
-            return usuarioService.getUsuarioByCorreo(correo);
-        } catch (Exception e) {
-           return ResponseProvider.error("Error al obtener el usuario", 500);
-        }
-    }
-
-
-    @POST // Indica que este método responde a solicitudes POST
+    @POST
+    @Path("/register")
     @Validar(entidad = "Usuario")
     @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
     @Consumes(MediaType.APPLICATION_JSON) // Indica que el método acepta datos en formato JSON
@@ -69,6 +58,19 @@ public class UserController {
         }
     }
     
+    @POST
+    @Path("/login")
+    @Validar(entidad = "UsuarioLogin")
+    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
+    @Consumes(MediaType.APPLICATION_JSON) // Indica que el método acepta datos en formato JSON
+    public Response loginUser(Usuario usuarioData) {
+        
+        try {
+            return usuarioService.loginUser(usuarioData);
+        } catch (Exception e) {
+           return ResponseProvider.error("Error al validar el usuario", 500);
+        }
+    }
 
     @PUT // Indica que este método responde a solicitudes PUT
     @Path("/{id}") // Ruta con el ID del usuario a actualizar

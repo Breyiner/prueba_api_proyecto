@@ -1,5 +1,6 @@
-package MIDDLEWARES;
+package MIDDLEWARES.Campos;
 
+import MIDDLEWARES.Campo;
 import java.util.ArrayList;
 import java.util.List;
 

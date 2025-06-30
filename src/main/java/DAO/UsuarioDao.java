@@ -9,8 +9,6 @@ import java.sql.SQLException; // Importa la clase SQLException para manejar erro
 
 public class UsuarioDao {
     
-    private static final ConnectionDB conn = new ConnectionDB(); // Crea una instancia de ConnectionDB para manejar la conexión a la base de datos
-    
     /**
      * Método para obtener todos los usuarios de la base de datos.
      * Realiza una consulta SQL para seleccionar todos los registros de la tabla 'usuarios'.
@@ -19,7 +17,7 @@ public class UsuarioDao {
      */
     public static ResultSet getUsuarios() {
         
-        Connection connection = conn.connect(); // Establece la conexión a la base de datos
+        Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
         
         try {
             // Prepara la consulta SQL para seleccionar todos los usuarios
@@ -42,7 +40,7 @@ public class UsuarioDao {
      */
     public static ResultSet getUsuarioById(int id) {
         
-        Connection connection = conn.connect(); // Establece la conexión a la base de datos
+        Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
         
         try {
             // Prepara la consulta SQL para seleccionar un usuario por ID
@@ -66,7 +64,7 @@ public class UsuarioDao {
      */
     public static ResultSet getUsuarioByCorreo(String correo) {
         
-        Connection connection = conn.connect(); // Establece la conexión a la base de datos
+        Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
         
         try {
             // Prepara la consulta SQL para seleccionar un usuario por correo
@@ -77,7 +75,7 @@ public class UsuarioDao {
             return respuesta; // Devuelve el ResultSet con el usuario encontrado
             
         } catch (SQLException e) {
-            throw new Error("Error al obtener los usuarios");
+            throw new Error("Error al obtener el usuario");
         }
     }
    
@@ -90,10 +88,10 @@ public class UsuarioDao {
      */
     public static ResultSet createUsuario(Usuario usuarioData) {
         
-        Connection connection = conn.connect(); // Establece la conexión a la base de datos
+        Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
         
         // Consulta SQL para insertar un nuevo usuario en la tabla
-        String query = "INSERT INTO usuarios (nombre, apellido, correo, contrasean, genero_id, ciudad_id, estado_id) VALUES "
+        String query = "INSERT INTO usuarios (nombre, apellido, correo, contrasena, genero_id, ciudad_id, estado_id) VALUES "
                 + "(?,?,?,?,?,?,?)";
         
         try {
@@ -129,10 +127,10 @@ public class UsuarioDao {
      * @return Número de filas afectadas por la actualización (0 si no se encontró el usuario)
      */
     public static int updateUsuario(int id, Usuario usuarioData) {
-        Connection connection = conn.connect(); // Establece la conexión a la base de datos
+        Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
         
         // Consulta SQL para actualizar los datos del usuario
-        String query = "UPDATE usuarios SET nombre = ?, apellido = ?, correo = ?, contrasean = ?, genero_id = ?, ciudad_id = ?, estado_id = ? "
+        String query = "UPDATE usuarios SET nombre = ?, apellido = ?, correo = ?, contrasena = ?, genero_id = ?, ciudad_id = ?, estado_id = ? "
                 + "WHERE id = ?";
         
         try {
@@ -167,7 +165,7 @@ public class UsuarioDao {
      */
     public static int deleteUsuario(int id) {
         
-        Connection connection = conn.connect(); // Establece la conexión a la base de datos
+        Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
         
         try {
             // Prepara la consulta SQL para eliminar un usuario por ID

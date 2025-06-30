@@ -1,5 +1,6 @@
 package UTILS; // Paquete que contiene utilidades de la aplicación
 
+import io.github.cdimascio.dotenv.Dotenv;
 import java.sql.Connection; // Importa la clase Connection para manejar conexiones a la base de datos
 import java.sql.DriverManager; // Importa la clase DriverManager para gestionar los controladores de conexión
 import java.sql.SQLException; // Importa la clase SQLException para manejar errores de SQL
@@ -10,6 +11,18 @@ import java.sql.SQLException; // Importa la clase SQLException para manejar erro
  */
 public class ConnectionDB {
     
+//    private static final Dotenv dotenv = Dotenv.load();
+    
+//    // Credenciales y URL de conexión a la base de datos
+//    private static final String url = dotenv.get("DB_URL"); // URL de conexión a la base de datos
+//    private static final String userName = dotenv.get("DB_USER"); // Nombre de usuario para la base de datos
+//    private static final String password = dotenv.get("DB_PASSWORD"); // Contraseña para la base de datos
+    
+    // Credenciales y URL de conexión a la base de datos
+    private static final String url = ; // URL de conexión a la base de datos
+    private static final String userName = ; // Nombre de usuario para la base de datos
+    private static final String password = ; // Contraseña para la base de datos
+
 
     /**
      * Método para establecer una conexión con la base de datos.
@@ -18,15 +31,11 @@ public class ConnectionDB {
      */
     public static Connection connect() {
         
-        // Credenciales y URL de conexión a la base de datos
-        String userName = "root"; // Nombre de usuario para la base de datos
-        String password = "Breyner.051207"; // Contraseña para la base de datos
-        String url = "jdbc:mysql://localhost:3306/proyecto"; // URL de conexión a la base de datos
         Connection connection = null; // Inicializa la conexión como null
         
         try {
             // Carga el controlador JDBC para MySQL
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             
             // Establece la conexión a la base de datos utilizando las credenciales y la URL
             connection = DriverManager.getConnection(url, userName, password);

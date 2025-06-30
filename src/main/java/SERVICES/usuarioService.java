@@ -2,12 +2,14 @@ package SERVICES;
 
 import DAO.UsuarioDao;
 import MODEL.Usuario;
+import MODEL.UsuarioDTO;
 import PROVIDERS.ResponseProvider;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.core.Response;
+import org.json.JSONException;
 
 public class usuarioService {
     
@@ -24,7 +26,7 @@ public class usuarioService {
                     respuesta.getString("nombre"),
                     respuesta.getString("apellido"),
                     respuesta.getString("correo"),
-                    respuesta.getString("contrasean"),
+                    respuesta.getString("contrasena"),
                     Integer.parseInt(respuesta.getString("genero_id")),
                     Integer.parseInt(respuesta.getString("ciudad_id")),
                     Integer.parseInt(respuesta.getString("estado_id"))
@@ -61,7 +63,7 @@ public class usuarioService {
                     respuesta.getString("nombre"), // Obtiene el nombre del usuario
                     respuesta.getString("apellido"), // Obtiene el apellido del usuario
                     respuesta.getString("correo"), // Obtiene el correo electrónico del usuario
-                    respuesta.getString("contrasean"), // Obtiene la contraseña del usuario
+                    respuesta.getString("contrasena"), // Obtiene la contraseña del usuario
                     respuesta.getInt("genero_id"), // Obtiene el ID del género del usuario
                     respuesta.getInt("ciudad_id"), // Obtiene el ID de la ciudad del usuario
                     respuesta.getInt("estado_id") // Obtiene el ID del estado del usuario
@@ -83,7 +85,7 @@ public class usuarioService {
         }
     }
     
-    public static Response getUsuarioByCorreo(String correo) {
+    private static Usuario getUsuarioByCorreo(String correo) {
         Usuario usuario = null; // Variable para almacenar el usuario buscado
         
         try {
@@ -97,7 +99,7 @@ public class usuarioService {
                     respuesta.getString("nombre"), // Obtiene el nombre del usuario
                     respuesta.getString("apellido"), // Obtiene el apellido del usuario
                     respuesta.getString("correo"), // Obtiene el correo electrónico del usuario
-                    respuesta.getString("contrasean"), // Obtiene la contraseña del usuario
+                    respuesta.getString("contrasena"), // Obtiene la contraseña del usuario
                     respuesta.getInt("genero_id"), // Obtiene el ID del género del usuario
                     respuesta.getInt("ciudad_id"), // Obtiene el ID de la ciudad del usuario
                     respuesta.getInt("estado_id") // Obtiene el ID del estado del usuario
@@ -108,24 +110,25 @@ public class usuarioService {
             respuesta.close();
             
             // Devuelve el usuario con estado 200 OK si existe
-            if (usuario == null) {
-                return ResponseProvider.error("El usuario no existe.", 404);
-            } else {
-                return ResponseProvider.success(usuario, "Usuario obtenido con éxito.", 200);
-            }
+            return usuario;
             
         } catch (SQLException e) {
             // Si ocurre un error en la consulta, devuelve un estado 500
-            return ResponseProvider.error("Error interno al obtener los usuarios", 500);
+            throw new Error("Error al obtener el usuario");
         }
     }
     
     public static Response createUsuario(Usuario usuarioData) {
         try {
             
-            Response usuarioExistente = getUsuarioByCorreo(usuarioData.getCorreo());
+            Usuario usuarioExistente = getUsuarioByCorreo(usuarioData.getCorreo());
             
-            if (usuarioExistente.getStatus() == 200) return ResponseProvider.error("Este correo ya fué registrado.", 409);
+            if (usuarioExistente != null) return ResponseProvider.error("Este correo ya fué registrado.", 409);
+            
+            //Se obtiene la contraseña del usuario
+            String contrasenaText = usuarioData.getContrasena();
+            // se hashea la contraseña
+            usuarioData.setContrasena(PasswordService.hashPassword(contrasenaText));
             
             int idGenerado = 0; // Inicializa variable para almacenar el ID generado
             
@@ -136,6 +139,7 @@ public class usuarioService {
             while (ultimoRegistro.next()) {
                 idGenerado = ultimoRegistro.getInt(1);
                 usuarioData.setId(idGenerado); // Asigna el ID al objeto usuario
+                usuarioData.setContrasena(contrasenaText);
             }
             
             // Cierra el conjunto de resultados para optimizar recursos
@@ -151,6 +155,36 @@ public class usuarioService {
         } catch (SQLException e) {
             // Si ocurre un error en la consulta, devuelve un estado 500
             return ResponseProvider.error("Error interno al crear el usuario.", 500);
+        }
+    }
+    
+    public static Response loginUser(Usuario usuarioData) {
+        
+        try {
+            Usuario usuario = getUsuarioByCorreo(usuarioData.getCorreo());
+        
+            if(usuario == null) return ResponseProvider.error("Este correo no se encuentra registrado.", 404);
+            
+
+            if(!PasswordService.checkPassword(
+                    usuarioData.getContrasena(), 
+                    usuario.getContrasena()
+            ))
+                return ResponseProvider.error("Contraseña incorrecta.", 404);
+
+            else {
+                
+                UsuarioDTO usuarioDto = new UsuarioDTO(
+                        usuario.getId(),
+                        usuario.getNombre(),
+                        usuario.getApellido()
+                );
+                
+                return ResponseProvider.success(usuarioDto, "Datos validados con éxito.", 200);
+            }
+            
+        } catch (JSONException e) {
+            return ResponseProvider.error("Error interno al validar el usuario.", 500);
         }
     }
     
@@ -184,20 +218,20 @@ public class usuarioService {
     
     private static boolean existEmail(int id, Usuario usuarioData) {
 
-        boolean valido = false;
+        boolean existe = false;
 
         try {
             // Ejecuta la consulta para obtener todos los usuarios mediante la capa DAO
             ResultSet respuesta = UsuarioDao.getUsuarios();
-            while (respuesta.next()) { // Cambia esto a un while
+            while (respuesta.next()) {
 
-                if(respuesta.getInt("id") != id && usuarioData.getCorreo().equals(respuesta.getString("correo"))) valido = true;
+                if(respuesta.getInt("id") != id && usuarioData.getCorreo().equals(respuesta.getString("correo"))) existe = true;
 
             }
             // Cierra el ResultSet para liberar recursos
             respuesta.close();
 
-            return valido;
+            return existe;
 
         } catch (SQLException e) {
             throw new Error("Error al validar si el correo existe");
