@@ -1,6 +1,7 @@
 package MIDDLEWARES;
 
-import MIDDLEWARES.Campos.CamposCiudades;
+import MIDDLEWARES.Campos.CamposCiudad;
+import MIDDLEWARES.Campos.CamposGenero;
 import MIDDLEWARES.Campos.CamposUsuarioLogin;
 import MIDDLEWARES.Campos.CamposUsuario;
 import java.util.List;
@@ -12,7 +13,8 @@ public class ObtenerCampos {
         return switch (entidad.toLowerCase()){
             case "usuario" -> CamposUsuario.getCampos();
             case "usuariologin" -> CamposUsuarioLogin.getCampos();
-            case "ciudades" -> CamposCiudades.getCampos();
+            case "ciudades" -> CamposCiudad.getCampos();
+            case "generos" -> CamposGenero.getCampos();
             default -> null;
         };
     }
