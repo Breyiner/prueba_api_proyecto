@@ -16,6 +16,7 @@ public class ValidarCampos {
             int minLength = campo.getMinimum();
             int maxLength = campo.getMaximum();
             String type = campo.getType();
+            String regExp = campo.getRegExp();
             
             if(required && !data.has(name)) {
                 errores.add("El campo " + name + " es obligatorio.");
@@ -31,10 +32,15 @@ public class ValidarCampos {
                     if (!(valueProperty instanceof String)) errores.add("El campo " + name + " solo acepta texto.");
                     
                     else {
-                        int longitud = ((String) valueProperty).length();
+                        String valor = (String) valueProperty;
+                        int longitud = valor.length();
                         
                         if(longitud < minLength) errores.add("El campo " + name + " debe tener mínimo " + minLength + "caracteres.");
                         if(longitud > maxLength) errores.add("El campo " + name + " debe tener máximo " + maxLength + "caracteres.");
+                    
+                        if(regExp != null && !valor.matches(regExp)) {
+                            errores.add("El campo " + name + " no tiene el formato correcto.");
+                        }
                     }
                 }
                 
