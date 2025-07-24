@@ -6,13 +6,19 @@ public class Campo {
     private final int minimum;
     private final int maximum;
     private final String type; // "string", "numero", "booleano"
+    private final String regExp;
 
-    public Campo(String name, boolean required, int minimum, int maximum, String type) {
+    public Campo(String name, boolean required, int minimum, int maximum, String type, String regExp) {
         this.name = name;
         this.required = required;
         this.minimum = minimum;
         this.maximum = maximum;
         this.type = type;
+        this.regExp = regExp;
+    }
+
+    public String getRegExp() {
+        return regExp;
     }
 
     public String getName() {

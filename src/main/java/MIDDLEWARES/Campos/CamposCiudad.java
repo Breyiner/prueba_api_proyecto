@@ -10,7 +10,7 @@ public class CamposCiudad {
         
         List<Campo> campos = new ArrayList<>() ;
         
-        campos.add(new Campo("nombre", true, 3, 50, "string"));
+        campos.add(new Campo("nombre", true, 3, 50, "string", null));
         
         return campos;
     }

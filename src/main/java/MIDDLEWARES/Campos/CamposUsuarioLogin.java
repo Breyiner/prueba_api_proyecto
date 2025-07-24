@@ -11,8 +11,8 @@ public class CamposUsuarioLogin {
         
         List<Campo> campos = new ArrayList<>() ;
         
-        campos.add(new Campo("correo", true, 3, 50, "string"));
-        campos.add(new Campo("contrasena", true, 8, 20, "string"));
+        campos.add(new Campo("correo", true, 3, 50, "string", null));
+        campos.add(new Campo("contrasena", true, 8, 20, "string", null));
         
         return campos;
     }
