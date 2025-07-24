@@ -1,11 +1,11 @@
 package MIDDLEWARES;
 
 public class Campo {
-    private String name;
-    private boolean required;
-    private int minimum;
-    private int maximum;
-    private String type; // "string", "numero", "booleano"
+    private final String name;
+    private final boolean required;
+    private final int minimum;
+    private final int maximum;
+    private final String type; // "string", "numero", "booleano"
 
     public Campo(String name, boolean required, int minimum, int maximum, String type) {
         this.name = name;
