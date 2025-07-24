@@ -1,6 +1,7 @@
 package MIDDLEWARES;
 
 import MIDDLEWARES.Campos.CamposCiudad;
+import MIDDLEWARES.Campos.CamposEstado;
 import MIDDLEWARES.Campos.CamposGenero;
 import MIDDLEWARES.Campos.CamposUsuarioLogin;
 import MIDDLEWARES.Campos.CamposUsuario;
@@ -15,6 +16,7 @@ public class ObtenerCampos {
             case "usuariologin" -> CamposUsuarioLogin.getCampos();
             case "ciudades" -> CamposCiudad.getCampos();
             case "generos" -> CamposGenero.getCampos();
+            case "estados" -> CamposEstado.getCampos();
             default -> null;
         };
     }
