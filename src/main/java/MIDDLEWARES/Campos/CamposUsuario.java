@@ -17,7 +17,6 @@ public class CamposUsuario {
         campos.add(new Campo("contrasena", true, 8, 20, "string", null));
         campos.add(new Campo("genero_id", true, 1, 11, "number", null));
         campos.add(new Campo("ciudad_id", true, 1, 11, "number", null));
-        campos.add(new Campo("estado_id", true, 1, 11, "number", null));
         
         return campos;
     }

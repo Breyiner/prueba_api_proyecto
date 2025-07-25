@@ -14,6 +14,7 @@ public class Usuario {
     private String contrasena; // Contraseña del usuario
     private int genero_id; // ID que representa el género del usuario
     private int ciudad_id; // ID que representa la ciudad del usuario
+    private int rol_id; // ID que representa el rol del usuario
     private int estado_id; // ID que representa el estado del usuario
 
     // Constructor por defecto
@@ -30,9 +31,10 @@ public class Usuario {
      * @param contrasena Contraseña del usuario
      * @param genero_id ID del género del usuario
      * @param ciudad_id ID de la ciudad del usuario
+     * @param rol_id ID del rol del usuario
      * @param estado_id ID del estado del usuario
      */
-    public Usuario(int id, String nombre, String apellido, String correo, String contrasena, int genero_id, int ciudad_id, int estado_id) {
+    public Usuario(int id, String nombre, String apellido, String correo, String contrasena, int genero_id, int ciudad_id, int rol_id, int estado_id) {
         this.id = id; // Asigna el ID del usuario
         this.nombre = nombre; // Asigna el nombre del usuario
         this.apellido = apellido; // Asigna el apellido del usuario
@@ -40,7 +42,25 @@ public class Usuario {
         this.contrasena = contrasena; // Asigna la contraseña del usuario
         this.genero_id = genero_id; // Asigna el ID del género del usuario
         this.ciudad_id = ciudad_id; // Asigna el ID de la ciudad del usuario
+        this.rol_id = rol_id; // Asigna el ID del rol del usuario
         this.estado_id = estado_id; // Asigna el ID del estado del usuario
+    }
+
+    public Usuario(int id, String nombre, String apellido, String correo, int genero_id, int ciudad_id) {
+        this.id = id;
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.correo = correo;
+        this.genero_id = genero_id;
+        this.ciudad_id = ciudad_id;
+    }
+    
+    public int getRol_id() {
+        return rol_id;
+    }
+
+    public void setRol_id(int rol_id) {
+        this.rol_id = rol_id;
     }
 
     // Métodos getter y setter para acceder y modificar los atributos

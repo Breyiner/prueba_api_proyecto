@@ -29,6 +29,7 @@ public class usuarioService {
                     respuesta.getString("contrasena"),
                     Integer.parseInt(respuesta.getString("genero_id")),
                     Integer.parseInt(respuesta.getString("ciudad_id")),
+                    respuesta.getInt("rol_id"), // Obtiene el ID del rol del usuario
                     Integer.parseInt(respuesta.getString("estado_id"))
                 );
                 // Añade el objeto Usuario a la lista de usuarios
@@ -66,6 +67,7 @@ public class usuarioService {
                     respuesta.getString("contrasena"), // Obtiene la contraseña del usuario
                     respuesta.getInt("genero_id"), // Obtiene el ID del género del usuario
                     respuesta.getInt("ciudad_id"), // Obtiene el ID de la ciudad del usuario
+                    respuesta.getInt("rol_id"), // Obtiene el ID del rol del usuario
                     respuesta.getInt("estado_id") // Obtiene el ID del estado del usuario
                 );
             }
@@ -102,6 +104,7 @@ public class usuarioService {
                     respuesta.getString("contrasena"), // Obtiene la contraseña del usuario
                     respuesta.getInt("genero_id"), // Obtiene el ID del género del usuario
                     respuesta.getInt("ciudad_id"), // Obtiene el ID de la ciudad del usuario
+                    respuesta.getInt("rol_id"), // Obtiene el ID del rol del usuario
                     respuesta.getInt("estado_id") // Obtiene el ID del estado del usuario
                 );
             }
@@ -188,34 +191,6 @@ public class usuarioService {
         }
     }
     
-    public static Response updateUsuario(int id, Usuario usuarioData) {
-        try {
-           
-           Response usuarioExistente = getUsuarioById(id);
-            
-           if (usuarioExistente.getStatus() == 404) return ResponseProvider.error("Este usuario no existe.", 404);
-           
- 
-           if(existEmail(id, usuarioData)) return ResponseProvider.error("Este correo ya fué registrado.", 409);
-           
-            // Intenta actualizar el usuario en la base de datos y devuelve el número de filas afectadas
-            int rowsAffected = UsuarioDao.updateUsuario(id, usuarioData);
-            
-            if (rowsAffected != 0){
-                
-                usuarioData.setId(id);
-                // Si la actualización se realizó, se confirma el éxito con código 200 OK
-                return ResponseProvider.success(usuarioData, "Usuario actualizado con éxito.", 200);
-            }
-            else 
-                return ResponseProvider.error("Error al actualizar el usuario.", 400);
-            
-        } catch (Exception e) {
-            // Captura cualquier problema interno y devuelve un error 500 con mensaje
-            return ResponseProvider.error("Error interno al actualizar el usuario.", 500);
-        }
-    }
-    
     private static boolean existEmail(int id, Usuario usuarioData) {
 
         boolean existe = false;
@@ -235,6 +210,151 @@ public class usuarioService {
 
         } catch (SQLException e) {
             throw new Error("Error al validar si el correo existe");
+        }
+    }
+    
+    public static Response updateUsuario(int id, Usuario usuarioData) {
+        try {
+           
+           Response usuarioExistente = getUsuarioById(id);
+            
+           if (usuarioExistente.getStatus() == 404) return ResponseProvider.error("Este usuario no existe.", 404);
+           
+
+           if(existEmail(id, usuarioData)) return ResponseProvider.error("Este correo ya fué registrado.", 409);
+           
+            //Se obtiene la contraseña del usuario
+            String contrasenaText = usuarioData.getContrasena();
+            // se hashea la contraseña
+            usuarioData.setContrasena(PasswordService.hashPassword(contrasenaText));
+           
+            // Intenta actualizar el usuario en la base de datos y devuelve el número de filas afectadas
+            int rowsAffected = UsuarioDao.updateUsuario(id, usuarioData);
+            
+            if (rowsAffected != 0){
+                
+                usuarioData.setId(id);
+                // Si la actualización se realizó, se confirma el éxito con código 200 OK
+                return ResponseProvider.success(usuarioData, "Usuario actualizado con éxito.", 200);
+            }
+            else 
+                return ResponseProvider.error("Error al actualizar el usuario.", 400);
+            
+        } catch (Exception e) {
+            // Captura cualquier problema interno y devuelve un error 500 con mensaje
+            return ResponseProvider.error("Error interno al actualizar el usuario.", 500);
+        }
+    }
+    
+    public static Response partialUpdate(int id, Usuario usuarioData) {
+        try {
+            if(existEmail(id, usuarioData)) return ResponseProvider.error("Este correo ya fué registrado.", 409);
+            
+            Usuario usuarioParcial = new Usuario(
+                id,
+                usuarioData.getNombre(), // Obtiene el nombre del usuario
+                usuarioData.getApellido(), // Obtiene el apellido del usuario
+                usuarioData.getCorreo(), // Obtiene el correo electrónico del usuario
+                usuarioData.getGenero_id(), // Obtiene el ID del género del usuario
+                usuarioData.getCiudad_id() // Obtiene el ID de la ciudad del usuario
+            );
+            
+            // Intenta actualizar el usuario en la base de datos y devuelve el número de filas afectadas
+            int rowsAffected = UsuarioDao.partialUpdate(id, usuarioParcial);
+            
+            if (rowsAffected != 0){
+                
+                usuarioData.setId(id);
+                // Si la actualización se realizó, se confirma el éxito con código 200 OK
+                return ResponseProvider.success(usuarioParcial, "Usuario actualizado con éxito.", 200);
+            }
+            else 
+                return ResponseProvider.error("Error al actualizar el usuario.", 400);
+            
+        } catch (Exception e) {
+            // Captura cualquier problema interno y devuelve un error 500 con mensaje
+            return ResponseProvider.error("Error interno al actualizar el usuario.", 500);
+        }
+    }
+    
+    public static Response validatePassword(int id, Usuario usuarioData) {
+        try {
+            
+            String contrasenaHash = obtenerContrasena(id);
+            
+            if(contrasenaHash == null) return ResponseProvider.error("Usuario no encontrado.", 404);
+            
+            if(!PasswordService.checkPassword(
+                    usuarioData.getContrasena(), 
+                    contrasenaHash
+            ))
+                return ResponseProvider.error("Contraseña incorrecta.", 404);
+            
+            else {
+                return ResponseProvider.success(null, "Contraseña válida.", 200);
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+            return ResponseProvider.error("Error interno al validar la contraseña.", 500);
+        }
+    }
+    
+    public static Response updateContrasena(int id, Usuario usuarioData) {
+        try {
+            
+            //Se obtiene la contraseña del usuario
+            String contrasenaText = usuarioData.getContrasena();
+            // se hashea la contraseña
+            usuarioData.setContrasena(PasswordService.hashPassword(contrasenaText));
+            
+            // Ejecuta la actualización de la contraseña en la base de datos y recibe la cantidad de filas afectadas
+            int rowsAffected = UsuarioDao.updateContrasena(id, usuarioData);
+            
+            if (rowsAffected != 0) 
+                // Si contraseña actualizaa correctamente, devuelve código 204 No Content con mensaje
+                return ResponseProvider.success(null, "Contraseña actualizada con éxito.", 200);
+            else 
+                // Si no encontró usuario para actualizar contraseña, devuelve 404 Not Found con mensaje
+                return ResponseProvider.error("Este usuario no existe.", 404);
+            
+        } catch(Exception e) {
+            return ResponseProvider.error("Error interno al actualizar la contraseña.", 500);
+        }
+    }
+    
+    private static String obtenerContrasena(int id) {
+        Usuario usuario = null; // Variable para almacenar el usuario encontrado
+        
+        try {
+            // Realiza la consulta para recuperar el usuario por su ID a través de la capa DAO
+            ResultSet respuesta = UsuarioDao.getUsuarioById(id);
+            
+            // Si la consulta devuelve datos, crea el objeto Usuario
+            while (respuesta.next()) { 
+                usuario = new Usuario(
+                    respuesta.getInt("id"), // Obtiene el ID del usuario
+                    respuesta.getString("nombre"), // Obtiene el nombre del usuario
+                    respuesta.getString("apellido"), // Obtiene el apellido del usuario
+                    respuesta.getString("correo"), // Obtiene el correo electrónico del usuario
+                    respuesta.getString("contrasena"), // Obtiene la contraseña del usuario
+                    respuesta.getInt("genero_id"), // Obtiene el ID del género del usuario
+                    respuesta.getInt("ciudad_id"), // Obtiene el ID de la ciudad del usuario
+                    respuesta.getInt("rol_id"), // Obtiene el ID del rol del usuario
+                    respuesta.getInt("estado_id") // Obtiene el ID del estado del usuario
+                );
+            }
+            // Cierra el ResultSet para liberar recursos
+            respuesta.close();
+            
+            // Devuelve el usuario con estado 200 OK si existe
+            if (usuario == null) {
+                return null;
+            } else {
+                return usuario.getContrasena();
+            }
+            
+        } catch (SQLException e) {
+            return null;
         }
     }
     

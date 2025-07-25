@@ -91,8 +91,8 @@ public class UsuarioDao {
         Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
         
         // Consulta SQL para insertar un nuevo usuario en la tabla
-        String query = "INSERT INTO usuarios (nombre, apellido, correo, contrasena, genero_id, ciudad_id, estado_id) VALUES "
-                + "(?,?,?,?,?,?,?)";
+        String query = "INSERT INTO usuarios (nombre, apellido, correo, contrasena, genero_id, ciudad_id) VALUES "
+                + "(?,?,?,?,?,?)";
         
         try {
             // Prepara la consulta SQL para insertar un nuevo usuario y obtener las claves generadas
@@ -105,7 +105,6 @@ public class UsuarioDao {
             pstm.setString(4, usuarioData.getContrasena());
             pstm.setInt(5, usuarioData.getGenero_id());
             pstm.setInt(6, usuarioData.getCiudad_id());
-            pstm.setInt(7, usuarioData.getEstado_id());
 
             pstm.executeUpdate(); // Ejecuta la inserción
             
@@ -130,7 +129,7 @@ public class UsuarioDao {
         Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
         
         // Consulta SQL para actualizar los datos del usuario
-        String query = "UPDATE usuarios SET nombre = ?, apellido = ?, correo = ?, contrasena = ?, genero_id = ?, ciudad_id = ?, estado_id = ? "
+        String query = "UPDATE usuarios SET nombre = ?, apellido = ?, correo = ?, contrasena = ?, genero_id = ?, ciudad_id = ?, rol_id = ?, estado_id = ? "
                 + "WHERE id = ?";
         
         try {
@@ -144,8 +143,9 @@ public class UsuarioDao {
             pstm.setString(4, usuarioData.getContrasena());
             pstm.setInt(5, usuarioData.getGenero_id());
             pstm.setInt(6, usuarioData.getCiudad_id());
-            pstm.setInt(7, usuarioData.getEstado_id());
-            pstm.setInt(8, id); // Establece el ID del usuario a actualizar
+            pstm.setInt(7, usuarioData.getRol_id());
+            pstm.setInt(8, usuarioData.getEstado_id());
+            pstm.setInt(9, id); // Establece el ID del usuario a actualizar
             
             int affectedRow = pstm.executeUpdate(); // Ejecuta la actualización y obtiene el número de filas afectadas
             
@@ -153,6 +153,57 @@ public class UsuarioDao {
             
         } catch (SQLException e) {
             throw new Error("Error al actualizar el usuario");
+        }
+    }
+    
+    public static int partialUpdate(int id, Usuario usuarioParcial) {
+        Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
+        
+        // Consulta SQL para actualizar los datos del usuario
+        String query = "UPDATE usuarios SET nombre = ?, apellido = ?, correo = ?, genero_id = ?, ciudad_id = ? "
+                + "WHERE id = ?";
+        
+        try {
+            // Prepara la consulta SQL para actualizar el usuario
+            PreparedStatement pstm = connection.prepareStatement(query);
+            
+            // Establece los nuevos valores del usuario en la consulta
+            pstm.setString(1, usuarioParcial.getNombre());
+            pstm.setString(2, usuarioParcial.getApellido());
+            pstm.setString(3, usuarioParcial.getCorreo());
+            pstm.setInt(4, usuarioParcial.getGenero_id());
+            pstm.setInt(5, usuarioParcial.getCiudad_id());
+            pstm.setInt(6, id); // Establece el ID del usuario a actualizar
+            
+            int affectedRow = pstm.executeUpdate(); // Ejecuta la actualización y obtiene el número de filas afectadas
+            
+            return affectedRow; // Devuelve el número de filas afectadas
+            
+        } catch (SQLException e) {
+            throw new Error("Error al actualizar el usuario");
+        }
+    }
+    
+    public static int updateContrasena(int id, Usuario usuarioData) {
+        Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
+        
+        // Consulta SQL para actualizar los datos del usuario
+        String query = "UPDATE usuarios SET contrasena = ? WHERE id = ?";
+        
+        try {
+            // Prepara la consulta SQL para actualizar el usuario
+            PreparedStatement pstm = connection.prepareStatement(query);
+            
+            // Establece los nuevos valores del usuario en la consulta
+            pstm.setString(1, usuarioData.getContrasena());
+            pstm.setInt(2, id); // Establece el ID del usuario a actualizar
+            
+            int affectedRow = pstm.executeUpdate(); // Ejecuta la actualización y obtiene el número de filas afectadas
+            
+            return affectedRow; // Devuelve el número de filas afectadas
+            
+        } catch (SQLException e) {
+            throw new Error("Error al actualizar la contraseña");
         }
     }
     

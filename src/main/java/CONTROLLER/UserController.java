@@ -7,6 +7,7 @@ import SERVICES.usuarioService;
 import javax.ws.rs.Consumes; // Importa la anotación para indicar el tipo de contenido que consume el método
 import javax.ws.rs.DELETE; // Importa la anotación para manejar solicitudes DELETE
 import javax.ws.rs.GET; // Importa la anotación para manejar solicitudes GET
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST; // Importa la anotación para manejar solicitudes POST
 import javax.ws.rs.PUT; // Importa la anotación para manejar solicitudes PUT
 import javax.ws.rs.Path; // Importa la anotación para definir la ruta del recurso
@@ -83,6 +84,44 @@ public class UserController {
            return ResponseProvider.error("Error al actualizar el usuario", 500);
         }
     }
+    
+    @PATCH // Indica que este método responde a solicitudes PUT
+    @Path("/{id}") // Ruta con el ID del usuario a actualizar
+    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
+    @Consumes(MediaType.APPLICATION_JSON) // Indica que el método acepta datos en formato JSON
+    public Response partialUpdateUsuario(@PathParam("id") int id, Usuario usuarioData) {
+        try {
+            return usuarioService.partialUpdate(id, usuarioData);
+        } catch (Exception e) {
+           return ResponseProvider.error("Error al actualizar el usuario", 500);
+        }
+    }
+    
+    @POST
+    @Path("/validatePassword/{id}")
+    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
+    @Consumes(MediaType.APPLICATION_JSON) // Indica que el método acepta datos en formato JSON
+    public Response validatePassword(@PathParam("id") int id, Usuario usuarioData) {
+        
+        try {
+            return usuarioService.validatePassword(id, usuarioData);
+        } catch (Exception e) {
+           return ResponseProvider.error("Error al validar la contraseña", 500);
+        }
+    }
+    
+    @PATCH // Indica que este método responde a solicitudes PUT
+    @Path("/password/{id}") // Ruta con el ID del usuario a actualizar
+    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
+    @Consumes(MediaType.APPLICATION_JSON) // Indica que el método acepta datos en formato JSON
+    public Response updateContrasena(@PathParam("id") int id, Usuario usuarioData) {
+        try {
+            return usuarioService.updateContrasena(id, usuarioData);
+        } catch (Exception e) {
+           return ResponseProvider.error("Error al actualizar la contraseña", 500);
+        }
+    }
+    
     
     @DELETE // Indica que este método responde a solicitudes DELETE
     @Path("/{id}") // Ruta con el ID del usuario a eliminar
