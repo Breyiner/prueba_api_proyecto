@@ -4,6 +4,7 @@ import MIDDLEWARES.Campos.CamposCategorias;
 import MIDDLEWARES.Campos.CamposCiudad;
 import MIDDLEWARES.Campos.CamposEstado;
 import MIDDLEWARES.Campos.CamposGenero;
+import MIDDLEWARES.Campos.CamposMovimiento;
 import MIDDLEWARES.Campos.CamposRol;
 import MIDDLEWARES.Campos.CamposTiposMovimiento;
 import MIDDLEWARES.Campos.CamposUsuarioLogin;
@@ -23,6 +24,7 @@ public class ObtenerCampos {
             case "roles" -> CamposRol.getCampos();
             case "tiposmovimiento" -> CamposTiposMovimiento.getCampos();
             case "categorias" -> CamposCategorias.getCampos();
+            case "movimiento" -> CamposMovimiento.getCampos();
             default -> null;
         };
     }

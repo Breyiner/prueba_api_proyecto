@@ -1,0 +1,85 @@
+package MODEL;
+
+import java.math.BigDecimal;
+import java.util.Date;
+
+public class MovimientoDetalleDTO {
+    
+    private int id;
+    private String icono;
+    private String categoria;
+    private String color;
+    private String nombre;
+    private Date fecha_creacion;
+    private BigDecimal monto;
+    
+    public MovimientoDetalleDTO() {}
+
+    public MovimientoDetalleDTO(int id, String icono, String categoria, String color, String nombre, Date fecha_creacion, BigDecimal monto) {
+        this.id = id;
+        this.icono = icono;
+        this.categoria = categoria;
+        this.color = color;
+        this.nombre = nombre;
+        this.fecha_creacion = fecha_creacion;
+        this.monto = monto;
+    }
+
+    
+    
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getIcono() {
+        return icono;
+    }
+
+    public void setIcono(String icono) {
+        this.icono = icono;
+    }
+
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public Date getFecha_creacion() {
+        return fecha_creacion;
+    }
+
+    public void setFecha_creacion(Date fecha_creacion) {
+        this.fecha_creacion = fecha_creacion;
+    }
+
+    public BigDecimal getMonto() {
+        return monto;
+    }
+
+    public void setMonto(BigDecimal monto) {
+        this.monto = monto;
+    }
+}
