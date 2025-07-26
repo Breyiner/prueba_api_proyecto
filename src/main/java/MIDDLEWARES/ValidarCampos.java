@@ -23,7 +23,7 @@ public class ValidarCampos {
                 continue;
             }
             
-            if(data.isNull("fecha_limite")) continue;
+            if(!required && data.isNull(name)) continue;
             
             Object valueProperty = data.get(name);
             

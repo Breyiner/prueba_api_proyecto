@@ -1,5 +1,6 @@
 package MIDDLEWARES;
 
+import MIDDLEWARES.Campos.CamposAportesMeta;
 import MIDDLEWARES.Campos.CamposCategorias;
 import MIDDLEWARES.Campos.CamposCiudad;
 import MIDDLEWARES.Campos.CamposEstado;
@@ -27,6 +28,7 @@ public class ObtenerCampos {
             case "categorias" -> CamposCategorias.getCampos();
             case "movimiento" -> CamposMovimiento.getCampos();
             case "meta" -> CamposMeta.getCampos();
+            case "aportesmeta" -> CamposAportesMeta.getCampos();
             default -> null;
         };
     }
