@@ -1,7 +1,8 @@
 package MODEL;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.sql.Date;
 
 public class MovimientoDetalleDTO {
     
@@ -10,6 +11,7 @@ public class MovimientoDetalleDTO {
     private String categoria;
     private String color;
     private String nombre;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date fecha_creacion;
     private BigDecimal monto;
     

@@ -1,7 +1,8 @@
 package MODEL;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.sql.Date;
 
 public class Movimiento {
  
@@ -12,6 +13,7 @@ public class Movimiento {
     private String descripcion;
     private int categoria_id;
     private int estado_id;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date fecha_creacion;
 
     public Movimiento() {}
