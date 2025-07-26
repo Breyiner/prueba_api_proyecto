@@ -23,6 +23,8 @@ public class ValidarCampos {
                 continue;
             }
             
+            if(data.isNull("fecha_limite")) continue;
+            
             Object valueProperty = data.get(name);
             
             if (valueProperty.toString().trim().isEmpty()) errores.add("El campo" + name + " no puede estar vacío.");
