@@ -63,7 +63,7 @@ public class MovimientoDao {
                             AND tm.id = ?
                             AND MONTH(m.fecha_creacion) = ?
                         ORDER BY 
-                            cat.nombre
+                            m.fecha_creacion desc
                         """;
         try {
             PreparedStatement pstm = connection.prepareStatement(query);
