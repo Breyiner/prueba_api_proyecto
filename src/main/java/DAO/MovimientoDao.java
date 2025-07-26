@@ -19,6 +19,22 @@ public class MovimientoDao {
             throw new Error("Error al obtener los movimientos");
         }
     }
+    
+    public static ResultSet getCantidadMovimientos() {
+        
+        Connection connection = ConnectionDB.connect();
+        
+        try {
+
+            PreparedStatement pstm = connection.prepareStatement("SELECT COUNT(*) AS cantidad FROM movimientos");
+            ResultSet respuesta = pstm.executeQuery();
+            
+            return respuesta;
+            
+        } catch (SQLException e) {
+            throw new Error("Error al obtener la cantidad de movimientos");
+        }
+    }
 
     public static ResultSet getMovimientoById(int id) {
         Connection connection = ConnectionDB.connect();

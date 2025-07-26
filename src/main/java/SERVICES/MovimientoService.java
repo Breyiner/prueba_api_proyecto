@@ -1,6 +1,7 @@
 package SERVICES;
 
 import DAO.MovimientoDao;
+import MODEL.CantidadRegistrosDTO;
 import MODEL.Movimiento;
 import MODEL.MovimientoDetalleDTO;
 import PROVIDERS.ResponseProvider;
@@ -42,6 +43,33 @@ public class MovimientoService {
 
         } catch (SQLException e) {
             return ResponseProvider.error("Error interno al obtener los movimientos", 500);
+        }
+    }
+    
+    public static Response getCantidadMovimientos() {
+        CantidadRegistrosDTO cantidad = null;
+        
+        try {
+
+            ResultSet respuesta = MovimientoDao.getCantidadMovimientos();
+            while (respuesta.next()) { // Cambia esto a un while
+
+                cantidad = new CantidadRegistrosDTO(
+                    respuesta.getInt("cantidad")
+                );
+            }
+            // Cierra el ResultSet para liberar recursos
+            respuesta.close();
+            // Devuelve el usuario con estado 200 OK si existe
+            if (cantidad == null) {
+                return ResponseProvider.error("No se pudo obtener la cantidad de movimientos.", 404);
+            } else {
+                return ResponseProvider.success(cantidad, "Cantidad de movimientos obtenida con éxito.", 200);
+            }
+            
+        } catch (SQLException e) {
+            // Si ocurre un error en la consulta, devuelve un estado 500
+            return ResponseProvider.error("Error interno al obtener la cantidad de movimientos", 500);
         }
     }
 

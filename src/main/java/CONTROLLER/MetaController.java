@@ -22,6 +22,18 @@ public class MetaController {
         }
     }
     
+    @GET // Indica que este método responde a solicitudes GET
+    @Path("/cantidad")
+    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
+    public Response getUsuario() {
+        
+        try {
+            return MetaService.getCantidadMetas();
+        } catch (Exception e) {
+           return ResponseProvider.error("Error al obtener la cantida de metas", 500);
+        }
+    }
+    
     @GET
     @Path("/resumen/usuario/{usuario_id}")
     @Produces(MediaType.APPLICATION_JSON)

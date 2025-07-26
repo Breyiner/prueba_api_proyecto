@@ -2,6 +2,7 @@ package SERVICES;
 
 import DAO.AportesMetaDao;
 import MODEL.AportesMeta;
+import MODEL.CantidadRegistrosDTO;
 import PROVIDERS.ResponseProvider;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -36,6 +37,33 @@ public class AportesMetaService {
 
         } catch (SQLException e) {
             return ResponseProvider.error("Error interno al obtener los aportes.", 500);
+        }
+    }
+    
+    public static Response getCantidadAportes() {
+        CantidadRegistrosDTO cantidad = null;
+        
+        try {
+
+            ResultSet respuesta = AportesMetaDao.getCantidadAportes();
+            while (respuesta.next()) { // Cambia esto a un while
+
+                cantidad = new CantidadRegistrosDTO(
+                    respuesta.getInt("cantidad")
+                );
+            }
+            // Cierra el ResultSet para liberar recursos
+            respuesta.close();
+            // Devuelve el usuario con estado 200 OK si existe
+            if (cantidad == null) {
+                return ResponseProvider.error("No se pudo obtener la cantidad de aportes.", 404);
+            } else {
+                return ResponseProvider.success(cantidad, "Cantidad de aportes obtenida con éxito.", 200);
+            }
+            
+        } catch (SQLException e) {
+            // Si ocurre un error en la consulta, devuelve un estado 500
+            return ResponseProvider.error("Error interno al obtener la cantidad de aportes", 500);
         }
     }
 

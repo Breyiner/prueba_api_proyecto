@@ -31,6 +31,17 @@ public class UserController {
         } 
     }
     
+    @GET // Indica que este método responde a solicitudes GET
+    @Path("/cantidad")
+    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
+    public Response getUsuario() {
+        
+        try {
+            return usuarioService.getCantidadUsuarios();
+        } catch (Exception e) {
+           return ResponseProvider.error("Error al obtener la cantida de usuarios", 500);
+        }
+    }
 
     @GET // Indica que este método responde a solicitudes GET
     @Path("/{id}") // La ruta incluye el ID del usuario a buscar

@@ -31,6 +31,22 @@ public class UsuarioDao {
         }
     }
     
+    public static ResultSet getCantidadUsuarios() {
+        
+        Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
+        
+        try {
+
+            PreparedStatement pstm = connection.prepareStatement("SELECT COUNT(*) AS cantidad FROM usuarios");
+            ResultSet respuesta = pstm.executeQuery(); // Ejecuta la consulta y obtiene los resultados
+            
+            return respuesta;
+            
+        } catch (SQLException e) {
+            throw new Error("Error al obtener la cantidad de usuarios"); // Devuelve null si ocurre un error en la consulta
+        }
+    }
+    
     /**
      * Método para obtener un usuario específico por su ID.
      * Realiza una consulta SQL para seleccionar el usuario con el ID proporcionado.

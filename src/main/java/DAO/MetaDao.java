@@ -17,6 +17,22 @@ public class MetaDao {
         }
     }
     
+    public static ResultSet getCantidadMetas() {
+        
+        Connection connection = ConnectionDB.connect();
+        
+        try {
+
+            PreparedStatement pstm = connection.prepareStatement("SELECT COUNT(*) AS cantidad FROM metas");
+            ResultSet respuesta = pstm.executeQuery();
+            
+            return respuesta;
+            
+        } catch (SQLException e) {
+            throw new Error("Error al obtener la cantidad de metas");
+        }
+    }
+    
     public static ResultSet getMetasConTotal(int usuario_id) {
         Connection connection = ConnectionDB.connect();
         try {

@@ -21,6 +21,18 @@ public class MovimientoController {
             return ResponseProvider.error("Error al obtener los movimientos", 500);
         }
     }
+    
+    @GET // Indica que este método responde a solicitudes GET
+    @Path("/cantidad")
+    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
+    public Response getUsuario() {
+        
+        try {
+            return MovimientoService.getCantidadMovimientos();
+        } catch (Exception e) {
+           return ResponseProvider.error("Error al obtener la cantida de movimientos", 500);
+        }
+    }
 
     @GET
     @Path("/{id}")

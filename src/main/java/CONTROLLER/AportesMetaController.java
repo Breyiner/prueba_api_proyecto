@@ -20,6 +20,18 @@ public class AportesMetaController {
             return ResponseProvider.error("Error al obtener los aportes", 500);
         }
     }
+    
+    @GET // Indica que este método responde a solicitudes GET
+    @Path("/cantidad")
+    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
+    public Response getUsuario() {
+        
+        try {
+            return AportesMetaService.getCantidadAportes();
+        } catch (Exception e) {
+           return ResponseProvider.error("Error al obtener la cantida de aportes", 500);
+        }
+    }
 
     @GET
     @Path("/meta/{meta_id}")

@@ -1,6 +1,7 @@
 package SERVICES;
 
 import DAO.MetaDao;
+import MODEL.CantidadRegistrosDTO;
 import MODEL.Meta;
 import MODEL.MetaDetalleDTO;
 import MODEL.MetaResumenDTO;
@@ -49,6 +50,33 @@ public class MetaService {
 
         } catch (SQLException e) {
             return ResponseProvider.error("Error interno al obtener las metas.", 500);
+        }
+    }
+    
+    public static Response getCantidadMetas() {
+        CantidadRegistrosDTO cantidad = null;
+        
+        try {
+
+            ResultSet respuesta = MetaDao.getCantidadMetas();
+            while (respuesta.next()) { // Cambia esto a un while
+
+                cantidad = new CantidadRegistrosDTO(
+                    respuesta.getInt("cantidad")
+                );
+            }
+            // Cierra el ResultSet para liberar recursos
+            respuesta.close();
+            // Devuelve el usuario con estado 200 OK si existe
+            if (cantidad == null) {
+                return ResponseProvider.error("No se pudo obtener la cantidad de metas.", 404);
+            } else {
+                return ResponseProvider.success(cantidad, "Cantidad de metas obtenida con éxito.", 200);
+            }
+            
+        } catch (SQLException e) {
+            // Si ocurre un error en la consulta, devuelve un estado 500
+            return ResponseProvider.error("Error interno al obtener la cantidad de metas", 500);
         }
     }
     
