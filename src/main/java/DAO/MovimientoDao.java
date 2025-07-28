@@ -47,18 +47,33 @@ public class MovimientoDao {
         }
     }
     
-    public static ResultSet getMovimientosByUserId(int usuario_id) {
+    public static ResultSet getMovimientosByUserId(int id, int usuario_id) {
         Connection connection = ConnectionDB.connect();
         try {
-            PreparedStatement pstm = connection.prepareStatement("SELECT * FROM movimientos WHERE usuario_id = ?");
-            pstm.setInt(1, usuario_id);
+            
+            String query = """
+                           SELECT 
+                           	tm.id AS tipo_movimiento_id,
+                           	m.*
+                           FROM movimientos AS m
+                           JOIN categorias AS cat ON 
+                                cat.id = m.categoria_id
+                           JOIN tipos_movimiento AS tm ON 
+                                tm.id = cat.tipo_movimiento_id
+                           WHERE 
+                                m.id = ? AND m.usuario_id = ?;
+                           """;
+            
+            PreparedStatement pstm = connection.prepareStatement(query);
+            pstm.setInt(1,  id);
+            pstm.setInt(2, usuario_id);
             return pstm.executeQuery();
         } catch (SQLException e) {
             throw new Error("Error al obtener el movimiento");
         }
     }
     
-    public static ResultSet getMovimientosByCategoria(int usuario_id, int tipo_movimiento_id, int mes) {
+    public static ResultSet getMovimientosByCategoria(int categoria_id, int usuario_id, int tipo_movimiento_id, int mes) {
         
         Connection connection = ConnectionDB.connect();
         String query =  """
@@ -67,6 +82,7 @@ public class MovimientoDao {
                             cat.icono,
                             cat.nombre as categoria,
                             tm.color,
+                            tm.color_bg,
                             m.nombre,
                             m.fecha_creacion,
                             m.monto
@@ -76,6 +92,7 @@ public class MovimientoDao {
                         JOIN tipos_movimiento tm ON cat.tipo_movimiento_id = tm.id
                         WHERE 
                             m.usuario_id = ?
+                            AND cat.id = ?
                             AND tm.id = ?
                             AND MONTH(m.fecha_creacion) = ?
                         ORDER BY 
@@ -84,8 +101,9 @@ public class MovimientoDao {
         try {
             PreparedStatement pstm = connection.prepareStatement(query);
             pstm.setInt(1, usuario_id);
-            pstm.setInt(2, tipo_movimiento_id);
-            pstm.setInt(3, mes);
+            pstm.setInt(2, categoria_id);
+            pstm.setInt(3, tipo_movimiento_id);
+            pstm.setInt(4, mes);
            
             return pstm.executeQuery();
         } catch (SQLException e) {

@@ -20,10 +20,15 @@ public class CORSFilter implements ContainerResponseFilter { // Implementa la in
      */
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
+        System.out.println("CORS Filter ejecutándose para: " + requestContext.getMethod() + " " + requestContext.getUriInfo().getPath());
+    
         // Agrega el encabezado para permitir el acceso desde cualquier origen
-        responseContext.getHeaders().add("Access-Control-Allow-Origin", "*");
+        responseContext.getHeaders().putSingle("Access-Control-Allow-Origin", "http://localhost:5173");
+        // Permite credenciales
+        responseContext.getHeaders().putSingle("Access-Control-Allow-Credentials", "true");
+    
         // Especifica los métodos HTTP permitidos para las solicitudes CORS
-        responseContext.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        responseContext.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
         // Especifica los encabezados permitidos en las solicitudes CORS
         responseContext.getHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization");
         

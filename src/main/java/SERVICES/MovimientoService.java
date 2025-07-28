@@ -29,7 +29,7 @@ public class MovimientoService {
                     rs.getString("descripcion"),
                     rs.getInt("categoria_id")
                 );
-                movimiento.setEstado_id(rs.getInt("estado_id"));
+
                 movimiento.setFecha_creacion(rs.getDate("fecha_creacion"));
                 movimientos.add(movimiento);
             }
@@ -88,8 +88,7 @@ public class MovimientoService {
                     rs.getString("descripcion"),
                     rs.getInt("categoria_id")
                 );
-                
-                movimiento.setEstado_id(rs.getInt("estado_id"));
+
                 movimiento.setFecha_creacion(rs.getDate("fecha_creacion"));
             }
             rs.close();
@@ -105,11 +104,11 @@ public class MovimientoService {
         }
     }
     
-    public static Response getMovimientosByUser(int id) {
+    public static Response getMovimientosByUser(int id, int usuario_id) {
         List<Movimiento> movimientos = new ArrayList<>();
 
         try {
-            ResultSet rs = MovimientoDao.getMovimientosByUserId(id);
+            ResultSet rs = MovimientoDao.getMovimientosByUserId(id, usuario_id);
 
             while (rs.next()) {
                 Movimiento movimiento = new Movimiento(
@@ -121,7 +120,7 @@ public class MovimientoService {
                     rs.getInt("categoria_id")
                 );
                 
-                movimiento.setEstado_id(rs.getInt("estado_id"));
+                movimiento.setTipo_movimiento_id(rs.getInt("tipo_movimiento_id"));
                 movimiento.setFecha_creacion(rs.getDate("fecha_creacion"));
                 
                 movimientos.add(movimiento);
@@ -129,9 +128,9 @@ public class MovimientoService {
             rs.close();
 
             if (!movimientos.isEmpty()) {
-                return ResponseProvider.success(movimientos, "Movimientos del usuario obtenidos con éxito.", 200);
+                return ResponseProvider.success(movimientos, "Movimiento del usuario obtenido con éxito.", 200);
             } else {
-                return ResponseProvider.error("No hay movimientos registrados para el usuario.", 404);
+                return ResponseProvider.error("No hay movimiento registrado para el usuario.", 404);
             }
 
         } catch (SQLException e) {
@@ -139,12 +138,12 @@ public class MovimientoService {
         }
     }
     
-    public static Response getMovimientosByCategoria(int usuario_id, int tipo_movimiento_id, int mes){
+    public static Response getMovimientosByCategoria(int categoria_id, int usuario_id, int tipo_movimiento_id, int mes){
         List<MovimientoDetalleDTO> movimientos = new ArrayList<>();
         
         try {
             
-            ResultSet rs = MovimientoDao.getMovimientosByCategoria(usuario_id, tipo_movimiento_id, mes);
+            ResultSet rs = MovimientoDao.getMovimientosByCategoria(categoria_id, usuario_id, tipo_movimiento_id, mes);
             
             while(rs.next()) {
                 MovimientoDetalleDTO movimiento = new MovimientoDetalleDTO(
@@ -152,6 +151,7 @@ public class MovimientoService {
                     rs.getString("icono"),
                     rs.getString("categoria"),
                     rs.getString("color"),
+                    rs.getString("color_bg"),
                     rs.getString("nombre"),
                     rs.getDate("fecha_creacion"),
                     rs.getBigDecimal("monto")

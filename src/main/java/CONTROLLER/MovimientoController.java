@@ -46,26 +46,29 @@ public class MovimientoController {
     }
 
     @GET
-    @Path("/usuario/{usuario_id}")
+    @Path("{id}/usuario/{usuario_id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getMovimientosByUsuario(@PathParam("usuario_id") int usuario_id) {
+    public Response getMovimientosByUsuario(
+            @PathParam("id") int id,
+            @PathParam("usuario_id") int usuario_id) {
         try {
-            return MovimientoService.getMovimientosByUser(usuario_id);
+            return MovimientoService.getMovimientosByUser(id, usuario_id);
         } catch (Exception e) {
             return ResponseProvider.error("Error al obtener los movimientos del usuario", 500);
         }
     }
 
     @GET
-    @Path("/categoria")
+    @Path("/categoria/{cat_id}/usuario/{usuario_id}/tipoMovimiento/{tipo_id}/mes/{mes}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getMovimientosPorCategoria(
-        @QueryParam("usuario_id") int usuario_id,
-        @QueryParam("tipo_movimiento_id") int tipo_movimiento_id,
-        @QueryParam("mes") int mes
+        @PathParam("cat_id") int categoria_id,
+        @PathParam("usuario_id") int usuario_id,
+        @PathParam("tipo_id") int tipo_movimiento_id,
+        @PathParam("mes") int mes
     ) {
         try {
-            return MovimientoService.getMovimientosByCategoria(usuario_id, tipo_movimiento_id, mes);
+            return MovimientoService.getMovimientosByCategoria(categoria_id, usuario_id, tipo_movimiento_id, mes);
         } catch (Exception e) {
             return ResponseProvider.error("Error al obtener movimientos por categoría", 500);
         }

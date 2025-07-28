@@ -39,6 +39,33 @@ public class CategoriaService {
             return ResponseProvider.error("Error interno al obtener las categorías", 500);
         }
     }
+    
+    public static Response getCategoriasByTipoMovimiento(int tipo_movimiento_id) {
+        List<Categoria> lista = new ArrayList<>();
+
+        try {
+            ResultSet rs = CategoriaDao.getCategoriasByMovimientoId(tipo_movimiento_id);
+            while (rs.next()) {
+                Categoria categoria = new Categoria(
+                    rs.getInt("id"),
+                    rs.getString("nombre"),
+                    rs.getString("icono"),
+                    rs.getInt("tipo_movimiento_id")
+                );
+                lista.add(categoria);
+            }
+            rs.close();
+
+            if (!lista.isEmpty()) {
+                return ResponseProvider.success(lista, "Categorías obtenidas con éxito.", 200);
+            } else {
+                return ResponseProvider.error("No hay categorías registradas.", 404);
+            }
+
+        } catch (SQLException e) {
+            return ResponseProvider.error("Error interno al obtener las categorías", 500);
+        }
+    }
 
     public static Response getCategoriaById(int id) {
         Categoria categoria = null;

@@ -7,13 +7,13 @@ import java.sql.Date;
 public class Movimiento {
  
     private int id;
+    private int tipo_movimiento_id;
     private int usuario_id;
     private String nombre;
     private BigDecimal monto;
     private String descripcion;
     private int categoria_id;
-    private int estado_id;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
     private Date fecha_creacion;
 
     public Movimiento() {}
@@ -41,6 +41,14 @@ public class Movimiento {
 
     public void setUsuario_id(int usuario_id) {
         this.usuario_id = usuario_id;
+    }
+    
+    public int getTipo_movimiento_id() {
+        return tipo_movimiento_id;
+    }
+
+    public void setTipo_movimiento_id(int tipo_movimiento_id) {
+        this.tipo_movimiento_id = tipo_movimiento_id;
     }
 
     public String getNombre() {
@@ -75,13 +83,6 @@ public class Movimiento {
         this.categoria_id = categoria_id;
     }
 
-    public int getEstado_id() {
-        return estado_id;
-    }
-
-    public void setEstado_id(int estado_id) {
-        this.estado_id = estado_id;
-    }
 
     public Date getFecha_creacion() {
         return fecha_creacion;

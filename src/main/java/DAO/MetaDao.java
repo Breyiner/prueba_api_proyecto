@@ -52,7 +52,7 @@ public class MetaDao {
                            GROUP BY
                                m.id, m.nombre, m.monto, m.fecha_limite, m.fecha_creacion, m.completada
                            ORDER BY
-                               MONTH(m.fecha_creacion), m.completada;
+                               m.fecha_creacion, m.completada;
                            """;
             
             PreparedStatement pstm = connection.prepareStatement(query);
@@ -74,15 +74,17 @@ public class MetaDao {
                                m.descripcion,
                                m.monto,
                                m.fecha_creacion,
+                               m.completada,
                                m.fecha_limite,
-                               COUNT(a.id) AS cantidad_aportes
+                               COUNT(a.id) AS cantidad_aportes,
+                               COALESCE(SUM(a.monto), 0) AS total
                            FROM metas m
                            LEFT JOIN aportes_metas a ON 
                                m.id = a.meta_id
                            WHERE 
                                m.id = ? AND m.usuario_id = ?
                            GROUP BY 
-                               m.id, m.nombre, m.descripcion, m.monto, m.fecha_creacion, m.fecha_limite;
+                               m.id, m.nombre, m.descripcion, m.monto, m.fecha_creacion, m.completada, m.fecha_limite;
                            """;
             
             PreparedStatement pstm = connection.prepareStatement(query);

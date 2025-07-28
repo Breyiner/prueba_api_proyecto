@@ -9,7 +9,7 @@ public class AportesMeta {
     private int meta_id;
     private BigDecimal monto;
     private String descripcion;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
     private Date fecha_creacion;
 
     // Constructores

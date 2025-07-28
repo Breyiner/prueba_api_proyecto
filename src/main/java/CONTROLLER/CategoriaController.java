@@ -21,6 +21,17 @@ public class CategoriaController {
             return ResponseProvider.error("Error al obtener las categorías", 500);
         }
     }
+    
+    @GET
+    @Path("tipoMovimiento/{tipo_movimiento_id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getCategorias(@PathParam("tipo_movimiento_id") int tipo_movimiento_id) {
+        try {
+            return CategoriaService.getCategoriasByTipoMovimiento(tipo_movimiento_id);
+        } catch (Exception e) {
+            return ResponseProvider.error("Error al obtener las categorías", 500);
+        }
+    }
 
     @GET
     @Path("/{id}")

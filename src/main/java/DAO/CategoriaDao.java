@@ -18,6 +18,17 @@ public class CategoriaDao {
             throw new Error("Error al obtener las categorías");
         }
     }
+    
+    public static ResultSet getCategoriasByMovimientoId(int tipo_movimiento_id) {
+        Connection connection = ConnectionDB.connect();
+        try {
+            PreparedStatement pstm = connection.prepareStatement("SELECT * FROM categorias WHERE tipo_movimiento_id = ?");
+            pstm.setInt(1, tipo_movimiento_id);
+            return pstm.executeQuery();
+        } catch (SQLException e) {
+            throw new Error("Error al obtener las categorías");
+        }
+    }
 
     public static ResultSet getCategoriaById(int id) {
         Connection connection = ConnectionDB.connect();

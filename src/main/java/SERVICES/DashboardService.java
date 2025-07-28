@@ -5,6 +5,7 @@ import MODEL.ResumenCardDTO;
 import MODEL.ResumenCategoriasDTO;
 import MODEL.ResumenMetasDTO;
 import PROVIDERS.ResponseProvider;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -100,6 +101,22 @@ public class DashboardService {
                 resumenCompleto.add(card);
             }
             rsMetas.close();
+            
+            BigDecimal balance = resumenCompleto.get(0).getTotal();
+            
+            for (int i = 1; i < resumenCompleto.size(); i++) {
+                
+                balance = balance.subtract(resumenCompleto.get(i).getTotal());
+            }
+            
+            ResumenCardDTO card = new ResumenCardDTO(
+                    "ri-wallet-3-line",
+                    "#3367d6",
+                    "Balance",
+                    balance,
+                    "balance"
+            );
+            resumenCompleto.add(0,card);
 
             if (!resumenCompleto.isEmpty()) {
                 return ResponseProvider.success(resumenCompleto, "Resumen completo obtenido con éxito.", 200);
@@ -119,8 +136,11 @@ public class DashboardService {
 
             while (rs.next()) {
                 ResumenMetasDTO dto = new ResumenMetasDTO(
+                    rs.getInt("id"),
+                    rs.getInt("tipo_movimiento_id"),
                     rs.getString("icono"),
                     rs.getString("color"),
+                    rs.getString("color_bg"),
                     rs.getString("nombre"),
                     rs.getInt("cantidad"),
                     rs.getBigDecimal("total")
@@ -141,9 +161,12 @@ public class DashboardService {
 
             while (rs.next()) {
                 ResumenCategoriasDTO dto = new ResumenCategoriasDTO(
+                    rs.getInt("id"),
+                    rs.getInt("tipo_movimiento_id"),
                     rs.getString("icono"),
-                    rs.getString("color"),
                     rs.getString("nombre"),
+                    rs.getString("color"),
+                    rs.getString("color_bg"),
                     rs.getInt("cantidad"),
                     rs.getBigDecimal("total")
                 );
@@ -152,7 +175,7 @@ public class DashboardService {
 
             return ResponseProvider.success(lista, "Resumen completo obtenido con éxito.", 200);
         } catch (SQLException e) {
-            return ResponseProvider.error("Error al obtener resumen detallado de los movimients", 500);
+            return ResponseProvider.error("Error al obtener resumen detallado de las categorias", 500);
         }
 
     }

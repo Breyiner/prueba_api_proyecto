@@ -10,22 +10,33 @@ public class MetaDetalleDTO {
     public String nombre;
     public String descripcion;
     public BigDecimal monto;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    public BigDecimal total;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
     public Date fecha_creacion;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
     public Date fecha_limite;
     public int cantidad_aportes;
+    public String estado;
 
     public MetaDetalleDTO() {}
 
-    public MetaDetalleDTO(int id, String nombre, String descripcion, BigDecimal monto, Date fecha_creacion, Date fecha_limite, int cantidad_aportes) {
+    public MetaDetalleDTO(int id, String nombre, String descripcion, BigDecimal monto, BigDecimal total, Date fecha_creacion, Date fecha_limite, int cantidad_aportes) {
         this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.monto = monto;
+        this.total = total;
         this.fecha_creacion = fecha_creacion;
         this.fecha_limite = fecha_limite;
         this.cantidad_aportes = cantidad_aportes;
+    }
+
+    public BigDecimal getTotal() {
+        return total;
+    }
+
+    public void setTotal(BigDecimal total) {
+        this.total = total;
     }
     
     public int getId() {
@@ -82,6 +93,14 @@ public class MetaDetalleDTO {
 
     public void setCantidad_aportes(int cantidad_aportes) {
         this.cantidad_aportes = cantidad_aportes;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
   
     

@@ -3,21 +3,51 @@ package MODEL;
 import java.math.BigDecimal;
 
 public class ResumenCategoriasDTO {
+    private int id;
+    private int tipo_movimiento_id;
     private String icono;
     private String nombre;
     private String color;
+    private String color_bg;
     private int cantidad;
     private BigDecimal total;
 
     public ResumenCategoriasDTO() {
     }
 
-    public ResumenCategoriasDTO(String icono, String nombre, String color, int cantidad, BigDecimal total) {
+    public ResumenCategoriasDTO(int id, int tipo_movimiento_id, String icono, String nombre, String color, String color_bg, int cantidad, BigDecimal total) {
+        this.id = id;
+        this.tipo_movimiento_id = tipo_movimiento_id;
         this.icono = icono;
         this.nombre = nombre;
         this.color = color;
+        this.color_bg = color_bg;
         this.cantidad = cantidad;
         this.total = total;
+    }
+
+    public int getTipo_movimiento_id() {
+        return tipo_movimiento_id;
+    }
+
+    public void setTipo_movimiento_id(int tipo_movimiento_id) {
+        this.tipo_movimiento_id = tipo_movimiento_id;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getColor_bg() {
+        return color_bg;
+    }
+
+    public void setColor_bg(String color_bg) {
+        this.color_bg = color_bg;
     }
 
     public String getIcono() {

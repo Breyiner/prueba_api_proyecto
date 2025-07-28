@@ -84,6 +84,41 @@ public class MetaService {
         List<MetaResumenDTO> metas = new ArrayList<>();
 
         try {
+
+            metas = obtenerResumenMetas(usuario_id);
+            
+            for (MetaResumenDTO meta : metas) {
+
+                BigDecimal monto = meta.getMonto();
+                BigDecimal total = meta.getTotal();
+
+                int comparacion = monto.compareTo(total);
+
+                if(comparacion == 0 || comparacion < 0) updateCompletada(meta.getId(), usuario_id, true);
+                else updateCompletada(meta.getId(), usuario_id, false);
+                
+            }
+            
+            metas = obtenerResumenMetas(usuario_id);
+
+
+            if (!metas.isEmpty()) {
+                return ResponseProvider.success(metas, "Metas obtenidas con éxito.", 200);
+            } else {
+                return ResponseProvider.error("No hay metas registradas.", 404);
+            }
+
+        } catch (Exception e) {
+            return ResponseProvider.error("Error interno al obtener las metas.", 500);
+        }
+    }
+    
+    
+    private static List<MetaResumenDTO> obtenerResumenMetas(int usuario_id) {
+        List<MetaResumenDTO> metas = new ArrayList<>();
+        
+        try {
+            
             ResultSet rs = MetaDao.getMetasConTotal(usuario_id);
             while (rs.next()) {
                 MetaResumenDTO meta = new MetaResumenDTO(
@@ -95,65 +130,66 @@ public class MetaService {
                     rs.getBigDecimal("total"),
                     rs.getBoolean("completada")
                 );
-
-                LocalDate fecha = LocalDate.now();
                 
+                LocalDate fecha = LocalDate.now();
+
                 Date fecha_actual = Date.from(fecha.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 Date fecha_limite = meta.getFecha_limite();
                 
                 BigDecimal monto = meta.getMonto();
                 BigDecimal total = meta.getTotal();
-                
+
                 int comparacion = monto.compareTo(total);
-                
+
                 if(comparacion == 0 || comparacion < 0) meta.setMensaje("¡Lo lograste!, Felicidades");
                 else meta.setMensaje("¡Tu puedes lograrlo!, Suerte");
                 
-                if(fecha_limite != null && fecha_limite.before( fecha_actual)) meta.setMensaje("¡No te rindas!, Aún puedes actualizar la fecha.");
-                
+                if(fecha_limite != null && fecha_limite.before( fecha_actual) && !meta.isCompletada()) meta.setMensaje("¡No te rindas!, Aún puedes actualizar la fecha.");
                 metas.add(meta);
             }
             rs.close();
-
-            if (!metas.isEmpty()) {
-                return ResponseProvider.success(metas, "Metas obtenidas con éxito.", 200);
-            } else {
-                return ResponseProvider.error("No hay metas registradas.", 404);
-            }
-
+            
+            return metas;
         } catch (SQLException e) {
-            return ResponseProvider.error("Error interno al obtener las metas.", 500);
+            throw new Error("Error al obtener las metas");
         }
+      
     }
     
     public static Response getMetasCantMovimientos(int id, int usuario_id) {
-        List<MetaDetalleDTO> metas = new ArrayList<>();
+        MetaDetalleDTO meta = null;
 
         try {
             ResultSet rs = MetaDao.getMetasCantMovimientos(id, usuario_id);
             while (rs.next()) {
-                MetaDetalleDTO meta = new MetaDetalleDTO(
+                meta = new MetaDetalleDTO(
                     rs.getInt("id"),
                     rs.getString("nombre"),
                     rs.getString("descripcion"),
                     rs.getBigDecimal("monto"),
-                    rs.getDate("fecha_limite"),
+                    rs.getBigDecimal("total"),
                     rs.getDate("fecha_creacion"),
+                    rs.getDate("fecha_limite"),
                     rs.getInt("cantidad_aportes")
                 );
 
-                metas.add(meta);
+                String estado = "";
+                
+                if(rs.getBoolean("completada")) estado = "Completada";
+                else estado = "Incompleta";
+                
+                meta.setEstado(estado);
             }
             rs.close();
 
-            if (!metas.isEmpty()) {
-                return ResponseProvider.success(metas, "Metas obtenidas con éxito.", 200);
+            if (meta != null) {
+                return ResponseProvider.success(meta, "Meta obtenida con éxito.", 200);
             } else {
-                return ResponseProvider.error("No hay metas registradas.", 404);
+                return ResponseProvider.error("No hay meta registrada.", 404);
             }
 
         } catch (SQLException e) {
-            return ResponseProvider.error("Error interno al obtener las metas.", 500);
+            return ResponseProvider.error("Error interno al obtener la meta.", 500);
         }
     }
 

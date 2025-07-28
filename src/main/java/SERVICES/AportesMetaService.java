@@ -2,6 +2,7 @@ package SERVICES;
 
 import DAO.AportesMetaDao;
 import MODEL.AportesMeta;
+import MODEL.AportesMetaDetalladoDTO;
 import MODEL.CantidadRegistrosDTO;
 import PROVIDERS.ResponseProvider;
 import java.sql.ResultSet;
@@ -119,6 +120,37 @@ public class AportesMetaService {
 
         } catch (SQLException e) {
             return ResponseProvider.error("Error interno al obtener el aporte.", 500);
+        }
+    }
+
+    public static Response getAportesDetalladosByParametros(int meta_id, int usuario_id, int mes) {
+        List<AportesMetaDetalladoDTO> aportes = new ArrayList<>();
+
+        try {
+            ResultSet rs = AportesMetaDao.getAportesDetalladosByParametros(meta_id, usuario_id, mes);
+            while (rs.next()) {
+                AportesMetaDetalladoDTO aporte = new AportesMetaDetalladoDTO(
+                    rs.getInt("id"),
+                    rs.getInt("meta_id"),
+                    rs.getString("icono"),
+                    rs.getString("color"),
+                    rs.getString("color_bg"),
+                    rs.getString("nombre"),
+                    rs.getDate("fecha_creacion"),
+                    rs.getBigDecimal("monto")
+                );
+                aportes.add(aporte);
+            }
+            rs.close();
+
+            if (!aportes.isEmpty()) {
+                return ResponseProvider.success(aportes, "Aportes detallados obtenidos con éxito.", 200);
+            } else {
+                return ResponseProvider.error("No hay aportes registrados con los parámetros especificados.", 404);
+            }
+
+        } catch (SQLException e) {
+            return ResponseProvider.error("Error interno al obtener los aportes detallados.", 500);
         }
     }
 

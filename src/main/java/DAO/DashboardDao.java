@@ -25,7 +25,7 @@ public class DashboardDao {
                            GROUP BY 
                                tm.id, tm.icono, tm.color, tm.nombre
                            ORDER BY 
-                               tm.nombre;
+                               tm.id;
                            """;
             
             PreparedStatement pstm = connection.prepareStatement(query);
@@ -74,9 +74,12 @@ public class DashboardDao {
         try {
             String query = """
                            SELECT 
+                               cat.id,
+                               tm.id as tipo_movimiento_id,
                                cat.icono,
                                cat.nombre,
                                tm.color,
+                               tm.color_bg,
                                COUNT(*) AS cantidad,
                                SUM(m.monto) AS total
                            FROM 
@@ -88,7 +91,7 @@ public class DashboardDao {
                                AND tm.id = ?
                                AND MONTH(m.fecha_creacion) = ?
                            GROUP BY 
-                               cat.icono, cat.nombre, tm.color
+                               cat.id, tm.id, cat.icono, cat.nombre, tm.color, tm.color_bg
                            ORDER BY 
                                total DESC;
                            """;
@@ -108,9 +111,11 @@ public class DashboardDao {
         try {
             String query = """
                            SELECT 
+                               m.id,
+                               tm.id as tipo_movimiento_id,
                                tm.icono,
                                tm.color,
-                               m.id,
+                               tm.color_bg,
                                m.nombre,
                                COUNT(*) AS cantidad,
                                SUM(apm.monto) AS total
@@ -122,7 +127,7 @@ public class DashboardDao {
                                m.usuario_id = ?
                                AND MONTH(apm.fecha_creacion) = ?
                            GROUP BY 
-                               tm.icono, tm.color, m.id, m.nombre
+                                m.id, tm.icono, tm.color, tm.color_bg, m.nombre
                            ORDER BY 
                                total DESC;
                            """;

@@ -19,9 +19,9 @@ public class ConnectionDB {
 //    private static final String password = dotenv.get("DB_PASSWORD"); // Contraseña para la base de datos
     
     // Credenciales y URL de conexión a la base de datos
-    private static final String url = ; // URL de conexión a la base de datos
-    private static final String userName = ; // Nombre de usuario para la base de datos
-    private static final String password = ; // Contraseña para la base de datos
+    private static final String url = "jdbc:mysql://localhost:3306/proyecto"; // URL de conexión a la base de datos
+    private static final String userName = "root"; // Nombre de usuario para la base de datos
+    private static final String password = "Breyner.051207"; // Contraseña para la base de datos
 
 
     /**
