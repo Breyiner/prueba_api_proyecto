@@ -55,7 +55,45 @@ public class AportesMetaDao {
         }
     }
     
-    public static ResultSet getAportesDetalladosByParametros(int meta_id, int usuario_id) {
+    public static ResultSet getAportesDetalladosByParametros(int meta_id, int usuario_id, int mes) {
+        Connection connection = ConnectionDB.connect();
+        String query = """
+            SELECT 
+                apm.id,
+                m.id AS meta_id,
+                tm.icono,
+                tm.color,
+                tm.color_bg,
+                m.nombre,
+                apm.fecha_creacion,
+                apm.monto
+            FROM 
+                aportes_metas apm
+            JOIN metas m ON apm.meta_id = m.id
+            JOIN tipos_movimiento tm 
+            WHERE 
+                m.id = ?
+                AND tm.id = 3
+                AND m.usuario_id = ?
+                AND MONTH(apm.fecha_creacion) = ?
+            GROUP BY 
+                apm.id, m.id, tm.icono, tm.color, tm.color_bg, m.nombre, apm.fecha_creacion, apm.monto
+            ORDER BY 
+                apm.fecha_creacion DESC
+        """;
+
+        try {
+            PreparedStatement pstm = connection.prepareStatement(query);
+            pstm.setInt(1, meta_id);
+            pstm.setInt(2, usuario_id);
+            pstm.setInt(3, mes);
+            return pstm.executeQuery();
+        } catch (SQLException e) {
+            throw new Error("Error al obtener los aportes detallados");
+        }
+    }
+    
+    public static ResultSet getAportesDetalladosByMeta(int meta_id, int usuario_id) {
         Connection connection = ConnectionDB.connect();
         String query = """
             SELECT 

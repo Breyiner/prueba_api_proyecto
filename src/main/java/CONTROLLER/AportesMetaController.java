@@ -56,14 +56,29 @@ public class AportesMetaController {
     }
 
     @GET
-    @Path("/detallados/meta/{meta_id}/usuario/{usuario_id}")
+    @Path("/detallados/meta/{meta_id}/usuario/{usuario_id}/mes/{mes}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAportesDetalladosByParametros(
+        @PathParam("meta_id") int meta_id,
+        @PathParam("usuario_id") int usuario_id,
+        @PathParam("mes") int mes
+    ) {
+        try {
+            return AportesMetaService.getAportesDetalladosByParametros(meta_id, usuario_id, mes);
+        } catch (Exception e) {
+            return ResponseProvider.error("Error al obtener los aportes detallados", 500);
+        }
+    }
+    
+    @GET
+    @Path("/detallados/meta/{meta_id}/usuario/{usuario_id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAportesDetalladosByMeta(
         @PathParam("meta_id") int meta_id,
         @PathParam("usuario_id") int usuario_id
     ) {
         try {
-            return AportesMetaService.getAportesDetalladosByParametros(meta_id, usuario_id);
+            return AportesMetaService.getAportesDetalladosByMeta(meta_id, usuario_id);
         } catch (Exception e) {
             return ResponseProvider.error("Error al obtener los aportes detallados", 500);
         }

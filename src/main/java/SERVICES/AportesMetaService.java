@@ -124,11 +124,42 @@ public class AportesMetaService {
         }
     }
 
-    public static Response getAportesDetalladosByParametros(int meta_id, int usuario_id) {
+    public static Response getAportesDetalladosByParametros(int meta_id, int usuario_id, int mes) {
         List<AportesMetaDetalladoDTO> aportes = new ArrayList<>();
 
         try {
-            ResultSet rs = AportesMetaDao.getAportesDetalladosByParametros(meta_id, usuario_id);
+            ResultSet rs = AportesMetaDao.getAportesDetalladosByParametros(meta_id, usuario_id, mes);
+            while (rs.next()) {
+                AportesMetaDetalladoDTO aporte = new AportesMetaDetalladoDTO(
+                    rs.getInt("id"),
+                    rs.getInt("meta_id"),
+                    rs.getString("icono"),
+                    rs.getString("color"),
+                    rs.getString("color_bg"),
+                    rs.getString("nombre"),
+                    rs.getString("fecha_creacion").substring(0, 10),
+                    rs.getBigDecimal("monto")
+                );
+                aportes.add(aporte);
+            }
+            rs.close();
+
+            if (!aportes.isEmpty()) {
+                return ResponseProvider.success(aportes, "Aportes detallados obtenidos con éxito.", 200);
+            } else {
+                return ResponseProvider.error("No hay aportes registrados con los parámetros especificados.", 404);
+            }
+
+        } catch (SQLException e) {
+            return ResponseProvider.error("Error interno al obtener los aportes detallados.", 500);
+        }
+    }
+    
+    public static Response getAportesDetalladosByMeta(int meta_id, int usuario_id) {
+        List<AportesMetaDetalladoDTO> aportes = new ArrayList<>();
+
+        try {
+            ResultSet rs = AportesMetaDao.getAportesDetalladosByMeta(meta_id, usuario_id);
             while (rs.next()) {
                 AportesMetaDetalladoDTO aporte = new AportesMetaDetalladoDTO(
                     rs.getInt("id"),
