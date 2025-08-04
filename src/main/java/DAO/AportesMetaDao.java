@@ -55,7 +55,7 @@ public class AportesMetaDao {
         }
     }
     
-    public static ResultSet getAportesDetalladosByParametros(int meta_id, int usuario_id, int mes) {
+    public static ResultSet getAportesDetalladosByParametros(int meta_id, int usuario_id) {
         Connection connection = ConnectionDB.connect();
         String query = """
             SELECT 
@@ -75,7 +75,6 @@ public class AportesMetaDao {
                 m.id = ?
                 AND tm.id = 3
                 AND m.usuario_id = ?
-                AND MONTH(apm.fecha_creacion) = ?
             GROUP BY 
                 apm.id, m.id, tm.icono, tm.color, tm.color_bg, m.nombre, apm.fecha_creacion, apm.monto
             ORDER BY 
@@ -86,10 +85,37 @@ public class AportesMetaDao {
             PreparedStatement pstm = connection.prepareStatement(query);
             pstm.setInt(1, meta_id);
             pstm.setInt(2, usuario_id);
-            pstm.setInt(3, mes);
             return pstm.executeQuery();
         } catch (SQLException e) {
             throw new Error("Error al obtener los aportes detallados");
+        }
+    }
+    
+    public static ResultSet getAportesResumidos(int usuario_id, int mes) {
+        Connection connection = ConnectionDB.connect();
+        String query = """
+                       SELECT 
+                        apm.id,
+                        m.nombre,
+                        tm.color,
+                        apm.fecha_creacion
+                       FROM aportes_metas AS apm
+                       INNER JOIN metas AS m ON m.id = apm.meta_id
+                       INNER JOIN tipos_movimiento AS tm ON tm.id = 3
+                       WHERE
+                       	m.usuario_id = ?
+                           AND MONTH(apm.fecha_creacion) = ?
+                       ORDER BY
+                       	apm.id DESC;
+                       """;
+        
+        try {
+            PreparedStatement pstm = connection.prepareStatement(query);
+            pstm.setInt(1, usuario_id);
+            pstm.setInt(2, mes);
+            return pstm.executeQuery();
+        } catch (SQLException e) {
+            throw new Error("Error al obtener los aportes resumidos");
         }
     }
 

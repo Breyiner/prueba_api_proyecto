@@ -10,16 +10,16 @@ public class MetaResumenDTO {
     private String nombre;
     private BigDecimal monto;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
-    private Date fecha_limite;
+    private String fecha_limite;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
-    private Date fecha_creacion;
+    private String fecha_creacion;
     private BigDecimal total;
     private boolean completada;
     private String mensaje;
 
     public MetaResumenDTO() {}
 
-    public MetaResumenDTO(int id, String nombre, BigDecimal monto, Date fecha_limite, Date fecha_creacion, BigDecimal total, boolean completada) {
+    public MetaResumenDTO(int id, String nombre, BigDecimal monto, String fecha_limite, String fecha_creacion, BigDecimal total, boolean completada) {
         this.id = id;
         this.nombre = nombre;
         this.monto = monto;
@@ -69,19 +69,19 @@ public class MetaResumenDTO {
         this.monto = monto;
     }
 
-    public Date getFecha_limite() {
+    public String getFecha_limite() {
         return fecha_limite;
     }
 
-    public void setFecha_limite(Date fecha_limite) {
+    public void setFecha_limite(String fecha_limite) {
         this.fecha_limite = fecha_limite;
     }
 
-    public Date getFecha_creacion() {
+    public String getFecha_creacion() {
         return fecha_creacion;
     }
 
-    public void setFecha_creacion(Date fecha_creacion) {
+    public void setFecha_creacion(String fecha_creacion) {
         this.fecha_creacion = fecha_creacion;
     }
 

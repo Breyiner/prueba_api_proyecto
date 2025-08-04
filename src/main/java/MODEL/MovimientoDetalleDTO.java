@@ -13,12 +13,12 @@ public class MovimientoDetalleDTO {
     private String color_bg;
     private String nombre;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
-    private Date fecha_creacion;
+    private String fecha_creacion;
     private BigDecimal monto;
     
     public MovimientoDetalleDTO() {}
 
-    public MovimientoDetalleDTO(int id, String icono, String categoria, String color, String color_bg, String nombre, Date fecha_creacion, BigDecimal monto) {
+    public MovimientoDetalleDTO(int id, String icono, String categoria, String color, String color_bg, String nombre, String fecha_creacion, BigDecimal monto) {
         this.id = id;
         this.icono = icono;
         this.categoria = categoria;
@@ -79,11 +79,11 @@ public class MovimientoDetalleDTO {
         this.nombre = nombre;
     }
 
-    public Date getFecha_creacion() {
+    public String getFecha_creacion() {
         return fecha_creacion;
     }
 
-    public void setFecha_creacion(Date fecha_creacion) {
+    public void setFecha_creacion(String fecha_creacion) {
         this.fecha_creacion = fecha_creacion;
     }
 

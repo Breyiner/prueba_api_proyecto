@@ -99,21 +99,6 @@ public class MetaController {
         }
     }
 
-    @PATCH
-    @Path("/{id}/usuario/{usuario_id}/completada")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response updateCompletada(
-        @PathParam("id") int id,
-        @PathParam("usuario_id") int usuario_id,
-        @QueryParam("completada") boolean completada
-    ) {
-        try {
-            return MetaService.updateCompletada(id, usuario_id, completada);
-        } catch (Exception e) {
-            return ResponseProvider.error("Error al actualizar el estado de completitud", 500);
-        }
-    }
-
     @DELETE
     @Path("/{id}/usuario/{usuario_id}")
     @Produces(MediaType.APPLICATION_JSON)

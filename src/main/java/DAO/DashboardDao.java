@@ -10,22 +10,22 @@ public class DashboardDao {
         try {
             String query = """
                            SELECT 
-                               tm.icono,
-                               tm.color,
-                               tm.nombre,
-                               COALESCE(SUM(m.monto), 0) AS total
+                              tm.icono,
+                              tm.color,
+                              tm.nombre,
+                              COALESCE(SUM(m.monto), 0) AS total
                            FROM 
-                               movimientos m
-                           LEFT JOIN categorias c ON m.categoria_id = c.id
-                           LEFT JOIN tipos_movimiento tm ON c.tipo_movimiento_id = tm.id
-                               AND m.usuario_id = ?
-                               AND MONTH(m.fecha_creacion) = ?
+                              tipos_movimiento tm
+                           LEFT JOIN categorias c ON c.tipo_movimiento_id = tm.id
+                           LEFT JOIN movimientos m ON m.categoria_id = c.id 
+                              AND m.usuario_id = ?
+                              AND MONTH(m.fecha_creacion) = ?
                            WHERE
-                           	tm.id != 3
+                              tm.id != 3
                            GROUP BY 
-                               tm.id, tm.icono, tm.color, tm.nombre
+                              tm.id, tm.icono, tm.color, tm.nombre
                            ORDER BY 
-                               tm.id;
+                              tm.id;
                            """;
             
             PreparedStatement pstm = connection.prepareStatement(query);
@@ -42,22 +42,21 @@ public class DashboardDao {
         try {
             String query = """
                            SELECT 
-                               tm.icono,
-                               tm.color,
-                               tm.nombre,
-                               COALESCE(SUM(apm.monto), 0) AS total
+                              tm.icono,
+                              tm.color,
+                              tm.nombre,
+                              COALESCE(SUM(apm.monto), 0) AS total
                            FROM 
-                               aportes_metas apm
-                           LEFT JOIN metas m ON apm.meta_id = m.id
-                           LEFT JOIN tipos_movimiento tm ON tm.id = 3
-                               AND m.usuario_id = ?
-                               AND MONTH(apm.fecha_creacion) = ?
+                              tipos_movimiento tm
+                           LEFT JOIN metas m ON m.usuario_id = ?
+                           LEFT JOIN aportes_metas apm ON apm.meta_id = m.id 
+                              AND MONTH(apm.fecha_creacion) = ?
                            WHERE
-                               tm.id = 3
+                              tm.id = 3
                            GROUP BY 
-                               tm.id, tm.icono, tm.color, tm.nombre
+                              tm.id, tm.icono, tm.color, tm.nombre
                            ORDER BY 
-                               tm.nombre;
+                              tm.nombre;
                            """;
             
             PreparedStatement pstm = connection.prepareStatement(query);

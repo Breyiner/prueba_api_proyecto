@@ -3,6 +3,7 @@ package SERVICES;
 import DAO.MovimientoDao;
 import MODEL.CantidadRegistrosDTO;
 import MODEL.Movimiento;
+import MODEL.MovimientoCalendarioDTO;
 import MODEL.MovimientoDetalleDTO;
 import PROVIDERS.ResponseProvider;
 
@@ -30,7 +31,7 @@ public class MovimientoService {
                     rs.getInt("categoria_id")
                 );
 
-                movimiento.setFecha_creacion(rs.getDate("fecha_creacion"));
+                movimiento.setFecha_creacion(rs.getString("fecha_creacion"));
                 movimientos.add(movimiento);
             }
             rs.close();
@@ -38,7 +39,7 @@ public class MovimientoService {
             if (!movimientos.isEmpty()) {
                 return ResponseProvider.success(movimientos, "movimientos obtenidos con éxito.", 200);
             } else {
-                return ResponseProvider.error("No hay movimientos registrados.", 404);
+                return ResponseProvider.success(movimientos, "No hay movimientos registrados.", 200);
             }
 
         } catch (SQLException e) {
@@ -89,7 +90,7 @@ public class MovimientoService {
                     rs.getInt("categoria_id")
                 );
 
-                movimiento.setFecha_creacion(rs.getDate("fecha_creacion"));
+                movimiento.setFecha_creacion(rs.getString("fecha_creacion"));
             }
             rs.close();
 
@@ -121,7 +122,7 @@ public class MovimientoService {
                 );
                 
                 movimiento.setTipo_movimiento_id(rs.getInt("tipo_movimiento_id"));
-                movimiento.setFecha_creacion(rs.getDate("fecha_creacion"));
+                movimiento.setFecha_creacion(rs.getString("fecha_creacion").substring(0, 10));
                 
                 movimientos.add(movimiento);
             }
@@ -130,7 +131,7 @@ public class MovimientoService {
             if (!movimientos.isEmpty()) {
                 return ResponseProvider.success(movimientos, "Movimiento del usuario obtenido con éxito.", 200);
             } else {
-                return ResponseProvider.error("No hay movimiento registrado para el usuario.", 404);
+                return ResponseProvider.success(movimientos, "No hay movimiento registrado para el usuario.", 200);
             }
 
         } catch (SQLException e) {
@@ -153,7 +154,7 @@ public class MovimientoService {
                     rs.getString("color"),
                     rs.getString("color_bg"),
                     rs.getString("nombre"),
-                    rs.getDate("fecha_creacion"),
+                    rs.getString("fecha_creacion").substring(0, 10),
                     rs.getBigDecimal("monto")
                 );
                 
@@ -165,7 +166,73 @@ public class MovimientoService {
             if (!movimientos.isEmpty()) {
                 return ResponseProvider.success(movimientos, "Movimientos obtenidos con éxito.", 200);
             } else {
-                return ResponseProvider.error("No hay movimientos registrados.", 404);
+                return ResponseProvider.success(movimientos, "No hay movimientos registrados.", 200);
+            }
+            
+        } catch (SQLException e) {
+            return ResponseProvider.error("Error interno al obtener los movimientos", 500);
+        }
+        
+    }
+    
+    public static Response getMovimientosResumidos(int usuario_id, int tipo_movimiento_id, int mes){
+        List<MovimientoCalendarioDTO> movimientos = new ArrayList<>();
+        
+        try {
+            ResultSet rs = MovimientoDao.getMovimientoResumidos(usuario_id, tipo_movimiento_id, mes);
+            
+            while(rs.next()) {
+                MovimientoCalendarioDTO movimiento = new MovimientoCalendarioDTO(
+                    rs.getInt("id"),
+                    rs.getString("nombre"),
+                    rs.getString("color"),
+                    rs.getString("fecha_creacion").substring(0, 10)
+                );
+                movimientos.add(movimiento);
+            }
+            
+            rs.close();
+            
+            if (!movimientos.isEmpty()) {
+                return ResponseProvider.success(movimientos, "Movimientos obtenidos con éxito.", 200);
+            } else {
+                return ResponseProvider.success(movimientos, "No hay movimientos registrados.", 200);
+            }
+            
+        } catch (SQLException e) {
+            return ResponseProvider.error("Error interno al obtener los movimientos", 500);
+        }
+        
+    }
+    
+    public static Response getMovimientosByDate(int usuario_id, int tipo_movimiento_id, String fecha) {
+        
+        List<MovimientoDetalleDTO> movimientos = new ArrayList<>();
+        
+        try {
+            ResultSet rs = MovimientoDao.getMovimientosByDate(usuario_id, tipo_movimiento_id, fecha);
+            
+            while(rs.next()) {
+                MovimientoDetalleDTO movimiento = new MovimientoDetalleDTO(
+                    rs.getInt("id"),
+                    rs.getString("icono"),
+                    rs.getString("categoria"),
+                    rs.getString("color"),
+                    rs.getString("color_bg"),
+                    rs.getString("nombre"),
+                    rs.getString("fecha_creacion").substring(0, 10),
+                    rs.getBigDecimal("monto")
+                );
+                
+                movimientos.add(movimiento);
+            }
+            
+            rs.close();
+            
+            if (!movimientos.isEmpty()) {
+                return ResponseProvider.success(movimientos, "Movimientos obtenidos con éxito.", 200);
+            } else {
+                return ResponseProvider.success(movimientos, "No hay movimientos registrados.", 200);
             }
             
         } catch (SQLException e) {
@@ -175,9 +242,16 @@ public class MovimientoService {
     }
 
     public static Response createMovimiento(Movimiento movimientoData) {
+        ResultSet rs = null;
         try {
             int idGenerado = 0;
-            ResultSet rs = MovimientoDao.createMovimiento(movimientoData);
+            if(movimientoData.getFecha_creacion() == null) {
+                rs = MovimientoDao.createMovimiento(movimientoData);
+            }
+
+            else  {
+                rs = MovimientoDao.createMovimientoDate(movimientoData);
+            }
 
             while (rs.next()) {
                 idGenerado = rs.getInt(1);

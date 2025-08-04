@@ -59,7 +59,31 @@ public class MetaDao {
             pstm.setInt(1, usuario_id);
             return pstm.executeQuery();
         } catch (SQLException e) {
+            System.out.println(e);
             throw new Error("Error al obtener las metas");
+        }
+    }
+    
+    public static ResultSet getMetaTotales(int meta_id) {
+        Connection connection = ConnectionDB.connect();
+        try {
+            
+            String query = """
+                           SELECT 
+                               m.id,
+                               m.monto,
+                               m.completada,
+                               COALESCE(SUM(apm.monto), 0) AS total
+                           FROM metas AS m
+                           LEFT JOIN aportes_metas AS apm ON m.id = apm.meta_id
+                           WHERE m.id = ?;
+                           """;
+            
+            PreparedStatement pstm = connection.prepareStatement(query);
+            pstm.setInt(1, meta_id);
+            return pstm.executeQuery();
+        } catch (SQLException e) {
+            throw new Error("Error al obtener la meta");
         }
     }
     
@@ -116,7 +140,7 @@ public class MetaDao {
             pstm.setString(2, meta.getNombre());
             pstm.setBigDecimal(3, meta.getMonto());
             pstm.setString(4, meta.getDescripcion());
-            pstm.setDate(5, meta.getFecha_limite());
+            pstm.setString(5, meta.getFecha_limite());
             pstm.executeUpdate();
             return pstm.getGeneratedKeys();
         } catch (SQLException e) {
@@ -132,7 +156,7 @@ public class MetaDao {
             pstm.setString(1, meta.getNombre());
             pstm.setBigDecimal(2, meta.getMonto());
             pstm.setString(3, meta.getDescripcion());
-            pstm.setDate(4, meta.getFecha_limite());
+            pstm.setString(4, meta.getFecha_limite());
             pstm.setInt(5, id);
             pstm.setInt(6, usuario_id);
             return pstm.executeUpdate();
@@ -141,14 +165,13 @@ public class MetaDao {
         }
     }
 
-    public static int updateCompletada(int id, int usuario_id, boolean completada) {
+    public static int updateCompletada(int id, boolean completada) {
         Connection connection = ConnectionDB.connect();
-        String query = "UPDATE metas SET completada = ? WHERE id = ? AND usuario_id = ?";
+        String query = "UPDATE metas SET completada = ? WHERE id = ?";
         try {
             PreparedStatement pstm = connection.prepareStatement(query);
             pstm.setBoolean(1, completada);
             pstm.setInt(2, id);
-            pstm.setInt(3, usuario_id);
             return pstm.executeUpdate();
         } catch (SQLException e) {
             throw new Error("Error al actualizar el estado de completada");
@@ -163,6 +186,7 @@ public class MetaDao {
             pstm.setInt(2, usuario_id);
             return pstm.executeUpdate();
         } catch (SQLException e) {
+            System.out.println(e);
             throw new Error("Error al eliminar la meta");
         }
     }

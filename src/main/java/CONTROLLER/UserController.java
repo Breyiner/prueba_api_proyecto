@@ -2,6 +2,7 @@ package CONTROLLER; // Paquete que contiene el controlador de usuarios
 
 import MIDDLEWARES.Validar;
 import MODEL.Usuario; // Importa la clase Usuario que representa la entidad de usuario
+import MODEL.UsuarioLoginDTO;
 import PROVIDERS.ResponseProvider;
 import SERVICES.usuarioService;
 import javax.ws.rs.Consumes; // Importa la anotación para indicar el tipo de contenido que consume el método
@@ -26,6 +27,18 @@ public class UserController {
         
         try {
             return usuarioService.getUsuarios();
+        } catch (Exception e) {
+            return ResponseProvider.error("Error al obtener los usuarios", 500);
+        } 
+    }
+
+    @GET // Indica que este método responde a solicitudes GET
+    @Path("/tabla")
+    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
+    public Response getUsuariosTabla() {
+        
+        try {
+            return usuarioService.getUsuariosTabla();
         } catch (Exception e) {
             return ResponseProvider.error("Error al obtener los usuarios", 500);
         } 
@@ -75,7 +88,7 @@ public class UserController {
     @Validar(entidad = "UsuarioLogin")
     @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
     @Consumes(MediaType.APPLICATION_JSON) // Indica que el método acepta datos en formato JSON
-    public Response loginUser(Usuario usuarioData) {
+    public Response loginUser(UsuarioLoginDTO usuarioData) {
         
         try {
             return usuarioService.loginUser(usuarioData);
@@ -133,6 +146,17 @@ public class UserController {
         }
     }
     
+    @DELETE // Indica que este método responde a solicitudes DELETE
+    @Path("soft/{id}") // Ruta con el ID del usuario a eliminar
+    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
+    public Response softDeleteUsuario(@PathParam("id") int id) {
+     
+        try {
+            return usuarioService.softDeleteUsuario(id);
+        } catch (Exception e) {
+           return ResponseProvider.error("Error al eliminar el usuario", 500);
+        }
+    }
     
     @DELETE // Indica que este método responde a solicitudes DELETE
     @Path("/{id}") // Ruta con el ID del usuario a eliminar

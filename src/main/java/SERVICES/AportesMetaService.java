@@ -1,6 +1,7 @@
 package SERVICES;
 
 import DAO.AportesMetaDao;
+import MODEL.AporteMetaCalendarioDTO;
 import MODEL.AportesMeta;
 import MODEL.AportesMetaDetalladoDTO;
 import MODEL.CantidadRegistrosDTO;
@@ -24,7 +25,7 @@ public class AportesMetaService {
                     rs.getInt("meta_id"),
                     rs.getBigDecimal("monto"),
                     rs.getString("descripcion"),
-                    rs.getDate("fecha_creacion")
+                    rs.getString("fecha_creacion").substring(0, 10)
                 );
                 aportes.add(aporte);
             }
@@ -79,7 +80,7 @@ public class AportesMetaService {
                     rs.getInt("meta_id"),
                     rs.getBigDecimal("monto"),
                     rs.getString("descripcion"),
-                    rs.getDate("fecha_creacion")
+                    rs.getString("fecha_creacion").substring(0, 10)
                 );
                 aportes.add(aporte);
             }
@@ -107,7 +108,7 @@ public class AportesMetaService {
                     rs.getInt("meta_id"),
                     rs.getBigDecimal("monto"),
                     rs.getString("descripcion"),
-                    rs.getDate("fecha_creacion")
+                    rs.getString("fecha_creacion").substring(0, 10)
                 );
             }
             rs.close();
@@ -123,11 +124,11 @@ public class AportesMetaService {
         }
     }
 
-    public static Response getAportesDetalladosByParametros(int meta_id, int usuario_id, int mes) {
+    public static Response getAportesDetalladosByParametros(int meta_id, int usuario_id) {
         List<AportesMetaDetalladoDTO> aportes = new ArrayList<>();
 
         try {
-            ResultSet rs = AportesMetaDao.getAportesDetalladosByParametros(meta_id, usuario_id, mes);
+            ResultSet rs = AportesMetaDao.getAportesDetalladosByParametros(meta_id, usuario_id);
             while (rs.next()) {
                 AportesMetaDetalladoDTO aporte = new AportesMetaDetalladoDTO(
                     rs.getInt("id"),
@@ -136,7 +137,7 @@ public class AportesMetaService {
                     rs.getString("color"),
                     rs.getString("color_bg"),
                     rs.getString("nombre"),
-                    rs.getDate("fecha_creacion"),
+                    rs.getString("fecha_creacion").substring(0, 10),
                     rs.getBigDecimal("monto")
                 );
                 aportes.add(aporte);
@@ -153,6 +154,37 @@ public class AportesMetaService {
             return ResponseProvider.error("Error interno al obtener los aportes detallados.", 500);
         }
     }
+    
+    public static Response getAportesResumidos(int usuario_id, int mes) {
+        
+        List<AporteMetaCalendarioDTO> movimientos = new ArrayList<>();
+        
+        try {
+            ResultSet rs = AportesMetaDao.getAportesResumidos(usuario_id, mes);
+            
+            while(rs.next()) {
+                AporteMetaCalendarioDTO movimiento = new AporteMetaCalendarioDTO(
+                    rs.getInt("id"),
+                    rs.getString("nombre"),
+                    rs.getString("color"),
+                    rs.getString("fecha_creacion").substring(0, 10)
+                );
+                movimientos.add(movimiento);
+            }
+            
+            rs.close();
+            
+            if (!movimientos.isEmpty()) {
+                return ResponseProvider.success(movimientos, "Aportes obtenidos con éxito.", 200);
+            } else {
+                return ResponseProvider.success(movimientos, "No hay aportes registrados.", 200);
+            }
+            
+        } catch (SQLException e) {
+            return ResponseProvider.error("Error interno al obtener los aportes", 500);
+        }
+        
+    }
 
     public static Response createAporte(AportesMeta aporteData) {
         try {
@@ -168,10 +200,14 @@ public class AportesMetaService {
             if (idGenerado == 0) {
                 return ResponseProvider.error("Error al crear el aporte.", 400);
             } else {
+                
+                MetaService.gestionarMetaCompletada(aporteData.getMeta_id());
+                
                 return ResponseProvider.success(aporteData, "Aporte creado con éxito.", 200);
             }
 
         } catch (SQLException e) {
+            System.out.println(e);
             return ResponseProvider.error("Error interno al crear el aporte.", 500);
         }
     }
@@ -189,6 +225,8 @@ public class AportesMetaService {
                 aporteData.setMeta_id(meta_id);
                 return ResponseProvider.success(aporteData, "Aporte actualizado con éxito.", 200);
             } else {
+                
+                MetaService.gestionarMetaCompletada(meta_id);
                 return ResponseProvider.error("El aporte no pertenece a la meta especificada o no existe.", 400);
             }
 

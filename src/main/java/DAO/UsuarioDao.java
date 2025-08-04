@@ -15,6 +15,7 @@ public class UsuarioDao {
      * 
      * @return ResultSet que contiene todos los usuarios o null si ocurre un error
      */
+    
     public static ResultSet getUsuarios() {
         
         Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
@@ -31,6 +32,42 @@ public class UsuarioDao {
         }
     }
     
+    public static ResultSet getUsuariosTabla() {
+        
+        Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
+        
+        String query = """
+                        SELECT 
+                            u.id,
+                            r.nombre AS rol,
+                            u.nombre,
+                            u.apellido,
+                            u.correo,
+                            g.nombre AS genero,
+                            c.nombre AS ciudad,
+                            e.nombre AS estado
+                        FROM usuarios u
+                        RIGHT JOIN roles r ON u.rol_id  = r.id
+                        RIGHT JOIN estados e ON u.estado_id = e.id
+                        RIGHT JOIN generos g ON u.genero_id = g.id
+                        RIGHT JOIN ciudades c ON u.ciudad_id = c.id
+                        ORDER BY 
+                            r.id,
+                            e.id,
+                            u.id;
+                       """;
+        
+        try {
+            // Prepara la consulta SQL para seleccionar todos los usuarios
+            PreparedStatement pstm = connection.prepareStatement(query);
+            ResultSet respuesta = pstm.executeQuery(); // Ejecuta la consulta y obtiene los resultados
+            
+            return respuesta; // Devuelve el ResultSet con los usuarios
+            
+        } catch (SQLException e) {
+            throw new Error("Error al obtener los usuarios"); // Devuelve null si ocurre un error en la consulta
+        }
+    }
     public static ResultSet getCantidadUsuarios() {
         
         Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
@@ -145,7 +182,7 @@ public class UsuarioDao {
         Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
         
         // Consulta SQL para actualizar los datos del usuario
-        String query = "UPDATE usuarios SET nombre = ?, apellido = ?, correo = ?, contrasena = ?, genero_id = ?, ciudad_id = ?, rol_id = ?, estado_id = ? "
+        String query = "UPDATE usuarios SET nombre = ?, apellido = ?, correo = ?, genero_id = ?, ciudad_id = ?, rol_id = ?, estado_id = ? "
                 + "WHERE id = ?";
         
         try {
@@ -156,12 +193,11 @@ public class UsuarioDao {
             pstm.setString(1, usuarioData.getNombre());
             pstm.setString(2, usuarioData.getApellido());
             pstm.setString(3, usuarioData.getCorreo());
-            pstm.setString(4, usuarioData.getContrasena());
-            pstm.setInt(5, usuarioData.getGenero_id());
-            pstm.setInt(6, usuarioData.getCiudad_id());
-            pstm.setInt(7, usuarioData.getRol_id());
-            pstm.setInt(8, usuarioData.getEstado_id());
-            pstm.setInt(9, id); // Establece el ID del usuario a actualizar
+            pstm.setInt(4, usuarioData.getGenero_id());
+            pstm.setInt(5, usuarioData.getCiudad_id());
+            pstm.setInt(6, usuarioData.getRol_id());
+            pstm.setInt(7, usuarioData.getEstado_id());
+            pstm.setInt(8, id); // Establece el ID del usuario a actualizar
             
             int affectedRow = pstm.executeUpdate(); // Ejecuta la actualización y obtiene el número de filas afectadas
             
@@ -200,7 +236,7 @@ public class UsuarioDao {
         }
     }
     
-    public static int updateContrasena(int id, Usuario usuarioData) {
+    public static int updateContrasena(int id, String contrasena) {
         Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
         
         // Consulta SQL para actualizar los datos del usuario
@@ -211,7 +247,7 @@ public class UsuarioDao {
             PreparedStatement pstm = connection.prepareStatement(query);
             
             // Establece los nuevos valores del usuario en la consulta
-            pstm.setString(1, usuarioData.getContrasena());
+            pstm.setString(1, contrasena);
             pstm.setInt(2, id); // Establece el ID del usuario a actualizar
             
             int affectedRow = pstm.executeUpdate(); // Ejecuta la actualización y obtiene el número de filas afectadas
@@ -220,6 +256,28 @@ public class UsuarioDao {
             
         } catch (SQLException e) {
             throw new Error("Error al actualizar la contraseña");
+        }
+    }
+    
+    public static int softDeleteUsuario(int id) {
+        Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
+        
+        // Consulta SQL para actualizar los datos del usuario
+        String query = "UPDATE usuarios SET estado_id = 2 WHERE id = ?";
+        
+        try {
+            // Prepara la consulta SQL para actualizar el usuario
+            PreparedStatement pstm = connection.prepareStatement(query);
+            
+            // Establece los nuevos valores del usuario en la consulta
+            pstm.setInt(1, id); // Establece el ID del usuario a actualizar
+            
+            int affectedRow = pstm.executeUpdate(); // Ejecuta la actualización y obtiene el número de filas afectadas
+            
+            return affectedRow; // Devuelve el número de filas afectadas
+            
+        } catch (SQLException e) {
+            throw new Error("Error al eliminar de forma segura al usuario");
         }
     }
     

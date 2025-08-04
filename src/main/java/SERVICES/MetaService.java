@@ -7,12 +7,10 @@ import MODEL.MetaDetalleDTO;
 import MODEL.MetaResumenDTO;
 import PROVIDERS.ResponseProvider;
 import java.math.BigDecimal;
-import java.util.Date;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,9 +30,9 @@ public class MetaService {
                     rs.getString("nombre"),
                     rs.getBigDecimal("monto"),
                     rs.getString("descripcion"),
-                    rs.getDate("fecha_limite")
+                    rs.getString("fecha_limite")
                 );
-                meta.setFecha_creacion(rs.getDate("fecha_creacion"));
+                meta.setFecha_creacion(rs.getString("fecha_creacion").substring(0, 10));
                 
                 meta.setCompletada(rs.getBoolean("completada"));
 
@@ -45,7 +43,7 @@ public class MetaService {
             if (!metas.isEmpty()) {
                 return ResponseProvider.success(metas, "Metas obtenidas con éxito.", 200);
             } else {
-                return ResponseProvider.error("No hay metas registradas.", 404);
+                return ResponseProvider.success(metas, "No hay metas registradas.", 200);
             }
 
         } catch (SQLException e) {
@@ -85,56 +83,25 @@ public class MetaService {
 
         try {
 
-            metas = obtenerResumenMetas(usuario_id);
-            
-            for (MetaResumenDTO meta : metas) {
-
-                BigDecimal monto = meta.getMonto();
-                BigDecimal total = meta.getTotal();
-
-                int comparacion = monto.compareTo(total);
-
-                if(comparacion == 0 || comparacion < 0) updateCompletada(meta.getId(), usuario_id, true);
-                else updateCompletada(meta.getId(), usuario_id, false);
-                
-            }
-            
-            metas = obtenerResumenMetas(usuario_id);
-
-
-            if (!metas.isEmpty()) {
-                return ResponseProvider.success(metas, "Metas obtenidas con éxito.", 200);
-            } else {
-                return ResponseProvider.error("No hay metas registradas.", 404);
-            }
-
-        } catch (Exception e) {
-            return ResponseProvider.error("Error interno al obtener las metas.", 500);
-        }
-    }
-    
-    
-    private static List<MetaResumenDTO> obtenerResumenMetas(int usuario_id) {
-        List<MetaResumenDTO> metas = new ArrayList<>();
-        
-        try {
-            
             ResultSet rs = MetaDao.getMetasConTotal(usuario_id);
             while (rs.next()) {
                 MetaResumenDTO meta = new MetaResumenDTO(
                     rs.getInt("id"),
                     rs.getString("nombre"),
                     rs.getBigDecimal("monto"),
-                    rs.getDate("fecha_limite"),
-                    rs.getDate("fecha_creacion"),
+                    rs.getString("fecha_limite"),
+                    rs.getString("fecha_creacion").substring(0, 10),
                     rs.getBigDecimal("total"),
                     rs.getBoolean("completada")
                 );
                 
-                LocalDate fecha = LocalDate.now();
+                LocalDate fecha_actual = LocalDate.now();
 
-                Date fecha_actual = Date.from(fecha.atStartOfDay(ZoneId.systemDefault()).toInstant());
-                Date fecha_limite = meta.getFecha_limite();
+                LocalDate fecha_limite = null;
+                if (meta.getFecha_limite() != null) {
+                    fecha_limite = LocalDate.parse(meta.getFecha_limite());
+                }
+
                 
                 BigDecimal monto = meta.getMonto();
                 BigDecimal total = meta.getTotal();
@@ -142,18 +109,47 @@ public class MetaService {
                 int comparacion = monto.compareTo(total);
 
                 if(comparacion == 0 || comparacion < 0) meta.setMensaje("¡Lo lograste!, Felicidades");
+                else if(fecha_limite != null && fecha_limite.isBefore( fecha_actual) && !meta.isCompletada()) 
+                    meta.setMensaje("¡No te rindas!, Aún puedes actualizar la fecha.");
                 else meta.setMensaje("¡Tu puedes lograrlo!, Suerte");
                 
-                if(fecha_limite != null && fecha_limite.before( fecha_actual) && !meta.isCompletada()) meta.setMensaje("¡No te rindas!, Aún puedes actualizar la fecha.");
+                
                 metas.add(meta);
             }
             rs.close();
-            
-            return metas;
+
+
+            if (!metas.isEmpty()) {
+                return ResponseProvider.success(metas, "Metas obtenidas con éxito.", 200);
+            } else {
+                return ResponseProvider.success(metas, "No hay metas registradas.", 200);
+            }
+
         } catch (SQLException e) {
-            throw new Error("Error al obtener las metas");
+            return ResponseProvider.error("Error interno al obtener las metas.", 500);
         }
-      
+    }
+    
+    public static void gestionarMetaCompletada(int meta_id) {
+            
+        try {
+            
+            ResultSet rs = MetaDao.getMetaTotales(meta_id);
+            
+            while(rs.next()) {
+                System.out.println(rs.getBigDecimal("monto"));
+                BigDecimal monto = rs.getBigDecimal("monto");
+                BigDecimal total = rs.getBigDecimal("total");
+
+                int comparacion = monto.compareTo(total);
+
+                if(comparacion == 0 || comparacion < 0) updateCompletada(meta_id, true);
+                else updateCompletada(meta_id, false);
+            }
+            
+        } catch (SQLException e) {
+            throw new Error("Error al verificar el estado de la meta");
+        }
     }
     
     public static Response getMetasCantMovimientos(int id, int usuario_id) {
@@ -168,12 +164,12 @@ public class MetaService {
                     rs.getString("descripcion"),
                     rs.getBigDecimal("monto"),
                     rs.getBigDecimal("total"),
-                    rs.getDate("fecha_creacion"),
-                    rs.getDate("fecha_limite"),
+                    rs.getString("fecha_creacion").substring(0, 10),
+                    rs.getString("fecha_limite"),
                     rs.getInt("cantidad_aportes")
                 );
 
-                String estado = "";
+                String estado = null;
                 
                 if(rs.getBoolean("completada")) estado = "Completada";
                 else estado = "Incompleta";
@@ -185,7 +181,7 @@ public class MetaService {
             if (meta != null) {
                 return ResponseProvider.success(meta, "Meta obtenida con éxito.", 200);
             } else {
-                return ResponseProvider.error("No hay meta registrada.", 404);
+                return ResponseProvider.error("La meta no existe.", 404);
             }
 
         } catch (SQLException e) {
@@ -205,9 +201,9 @@ public class MetaService {
                     rs.getString("nombre"),
                     rs.getBigDecimal("monto"),
                     rs.getString("descripcion"),
-                    rs.getDate("fecha_limite")
+                    rs.getString("fecha_limite")
                 );
-                meta.setFecha_creacion(rs.getDate("fecha_creacion"));
+                meta.setFecha_creacion(rs.getString("fecha_creacion").substring(0, 10));
                 meta.setCompletada(rs.getBoolean("completada"));
             }
             rs.close();
@@ -257,6 +253,7 @@ public class MetaService {
                 metaData.setId(id);
                 return ResponseProvider.success(metaData, "Meta actualizada con éxito.", 200);
             } else {
+                gestionarMetaCompletada(id);
                 return ResponseProvider.error("Error al actualizar la meta.", 400);
             }
 
@@ -265,13 +262,13 @@ public class MetaService {
         }
     }
 
-    public static Response updateCompletada(int id, int usuario_id, boolean completada) {
+    public static Response updateCompletada(int id, boolean completada) {
         try {
             Response existente = getMetaById(id);
             if (existente.getStatus() == 404)
                 return ResponseProvider.error("La meta no existe.", 404);
 
-            int filasAfectadas = MetaDao.updateCompletada(id, usuario_id, completada);
+            int filasAfectadas = MetaDao.updateCompletada(id, completada);
 
             if (filasAfectadas != 0) {
                 return ResponseProvider.success(null, "Campo 'completada' actualizado correctamente.", 200);
@@ -286,6 +283,11 @@ public class MetaService {
 
     public static Response deleteMeta(int id, int usuario_id) {
         try {
+            
+            Response hasAportes = AportesMetaService.getAportesByMetaId(id);
+            
+            if (hasAportes.getStatus() == 200) return ResponseProvider.error("La meta tiene aportes registrados.", 409);
+            
             int filasAfectadas = MetaDao.deleteMeta(id, usuario_id);
 
             if (filasAfectadas != 0) {

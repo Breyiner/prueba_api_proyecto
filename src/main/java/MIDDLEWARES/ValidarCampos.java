@@ -54,6 +54,13 @@ public class ValidarCampos {
                     if (!(valueProperty instanceof Boolean)) errores.add("El campo " + name + " solo acepta booleanos.");
                 }
                 
+                case "date" -> {
+                    String valor = (String) valueProperty;
+                    if(regExp != null && !valor.matches(regExp)) {
+                            errores.add("El campo " + name + " no tiene el formato correcto.");
+                    }
+                }
+                
                 default -> errores.add("Este tipo de dato no está relacionado con el campo " + name);
             }
         }

@@ -12,7 +12,7 @@ public class AportesMetaDetalladoDTO {
     private String color_bg;
     private String nombre;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
-    private Date fecha_creacion;
+    private String fecha_creacion;
     private BigDecimal monto;
 
     // Constructor vacío
@@ -20,7 +20,7 @@ public class AportesMetaDetalladoDTO {
 
     // Constructor completo
     public AportesMetaDetalladoDTO(int id, int meta_id, String icono, 
-                                  String color, String color_bg, String nombre, Date fecha_creacion, 
+                                  String color, String color_bg, String nombre, String fecha_creacion, 
                                   BigDecimal monto) {
         this.id = id;
         this.meta_id = meta_id;
@@ -81,11 +81,11 @@ public class AportesMetaDetalladoDTO {
         this.nombre = nombre;
     }
 
-    public Date getFecha_creacion() {
+    public String getFecha_creacion() {
         return fecha_creacion;
     }
 
-    public void setFecha_creacion(Date fecha_creacion) {
+    public void setFecha_creacion(String fecha_creacion) {
         this.fecha_creacion = fecha_creacion;
     }
 

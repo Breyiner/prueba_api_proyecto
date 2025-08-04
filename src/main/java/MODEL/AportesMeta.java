@@ -2,7 +2,6 @@ package MODEL;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigDecimal;
-import java.sql.Date;
 
 public class AportesMeta {
     private int id;
@@ -10,7 +9,7 @@ public class AportesMeta {
     private BigDecimal monto;
     private String descripcion;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
-    private Date fecha_creacion;
+    private String fecha_creacion;
 
     // Constructores
     public AportesMeta() {}
@@ -22,7 +21,7 @@ public class AportesMeta {
         this.descripcion = descripcion;
     }
 
-    public AportesMeta(int id, int meta_id, BigDecimal monto, String descripcion, Date fecha_creacion) {
+    public AportesMeta(int id, int meta_id, BigDecimal monto, String descripcion, String fecha_creacion) {
         this.id = id;
         this.meta_id = meta_id;
         this.monto = monto;
@@ -63,11 +62,11 @@ public class AportesMeta {
         this.descripcion = descripcion;
     }
 
-    public Date getFecha_creacion() {
+    public String getFecha_creacion() {
         return fecha_creacion;
     }
 
-    public void setFecha_creacion(Date fecha_creacion) {
+    public void setFecha_creacion(String fecha_creacion) {
         this.fecha_creacion = fecha_creacion;
     }
 }

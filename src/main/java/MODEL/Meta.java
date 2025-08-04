@@ -12,14 +12,14 @@ public class Meta {
     private BigDecimal monto;
     private String descripcion;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
-    private Date fecha_limite;
+    private String fecha_limite;
     private boolean completada;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
-    private Date fecha_creacion;
+    private String fecha_creacion;
 
     public Meta() {}
 
-    public Meta(int id, int usuario_id, String nombre, BigDecimal monto, String descripcion, Date fecha_limite) {
+    public Meta(int id, int usuario_id, String nombre, BigDecimal monto, String descripcion, String fecha_limite) {
         this.id = id;
         this.usuario_id = usuario_id;
         this.nombre = nombre;
@@ -68,11 +68,11 @@ public class Meta {
         this.descripcion = descripcion;
     }
 
-    public Date getFecha_limite() {
+    public String getFecha_limite() {
         return fecha_limite;
     }
 
-    public void setFecha_limite(Date fecha_limite) {
+    public void setFecha_limite(String fecha_limite) {
         this.fecha_limite = fecha_limite;
     }
 
@@ -84,11 +84,11 @@ public class Meta {
         this.completada = completada;
     }
 
-    public Date getFecha_creacion() {
+    public String getFecha_creacion() {
         return fecha_creacion;
     }
 
-    public void setFecha_creacion(Date fecha_creacion) {
+    public void setFecha_creacion(String fecha_creacion) {
         this.fecha_creacion = fecha_creacion;
     }
 }

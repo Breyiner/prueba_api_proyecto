@@ -4,6 +4,8 @@ import DAO.UsuarioDao;
 import MODEL.CantidadRegistrosDTO;
 import MODEL.Usuario;
 import MODEL.UsuarioDTO;
+import MODEL.UsuarioLoginDTO;
+import MODEL.UsuarioTablaDTO;
 import PROVIDERS.ResponseProvider;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -42,7 +44,43 @@ public class usuarioService {
             if (!usuarios.isEmpty()) {
                 return ResponseProvider.success(usuarios, "Usuarios obtenidos con éxito.", 200);
             } else {
-                return ResponseProvider.error("No hay usuarios registrados.", 404);
+                return ResponseProvider.success(usuarios, "No hay usuarios registrados.", 200);
+            }
+            
+        } catch (SQLException e) {
+            // Si ocurre un error en la consulta, devuelve un estado 500
+            return ResponseProvider.error("Error interno al obtener los usuarios", 500);
+        }
+    }
+    
+    public static Response getUsuariosTabla() {
+        List<UsuarioTablaDTO> usuarios = new ArrayList<>(); // Crea una lista para almacenar los usuarios recuperados
+        
+        try {
+            // Ejecuta la consulta para obtener todos los usuarios mediante la capa DAO
+            ResultSet respuesta = UsuarioDao.getUsuariosTabla();
+            while (respuesta.next()) { // Cambia esto a un while
+                // Crea un objeto Usuario con los datos de cada fila
+                UsuarioTablaDTO usuario = new UsuarioTablaDTO(
+                    respuesta.getInt("id"),
+                    respuesta.getString("rol"),
+                    respuesta.getString("nombre"),
+                    respuesta.getString("apellido"),
+                    respuesta.getString("correo"),
+                    respuesta.getString("genero"),
+                    respuesta.getString("ciudad"),
+                    respuesta.getString("estado")
+                );
+                // Añade el objeto Usuario a la lista de usuarios
+                usuarios.add(usuario);
+            }
+            // Cierra el ResultSet para liberar recursos
+            respuesta.close();
+            // Devuelve la lista de usuarios con estado 200 OK si hay usuarios
+            if (!usuarios.isEmpty()) {
+                return ResponseProvider.success(usuarios, "Usuarios obtenidos con éxito.", 200);
+            } else {
+                return ResponseProvider.success(usuarios, "No hay usuarios registrados.", 200);
             }
             
         } catch (SQLException e) {
@@ -92,7 +130,7 @@ public class usuarioService {
                     respuesta.getString("nombre"), // Obtiene el nombre del usuario
                     respuesta.getString("apellido"), // Obtiene el apellido del usuario
                     respuesta.getString("correo"), // Obtiene el correo electrónico del usuario
-                    respuesta.getString("contrasena"), // Obtiene la contraseña del usuario
+                    "", // Obtiene la contraseña del usuario
                     respuesta.getInt("genero_id"), // Obtiene el ID del género del usuario
                     respuesta.getInt("ciudad_id"), // Obtiene el ID de la ciudad del usuario
                     respuesta.getInt("rol_id"), // Obtiene el ID del rol del usuario
@@ -189,29 +227,31 @@ public class usuarioService {
         }
     }
     
-    public static Response loginUser(Usuario usuarioData) {
+    public static Response loginUser(UsuarioLoginDTO usuarioData) {
         
         try {
             Usuario usuario = getUsuarioByCorreo(usuarioData.getCorreo());
         
-            if(usuario == null) return ResponseProvider.error("Este correo no se encuentra registrado.", 404);
+            if(usuario == null) return ResponseProvider.error("Este correo no se encuentra registrado.", 404, null);
             
+            if(usuario.getEstado_id() == 2) return ResponseProvider.error("Este usuario no se encuentra registrado.", 404, null);
 
             if(!PasswordService.checkPassword(
                     usuarioData.getContrasena(), 
                     usuario.getContrasena()
             ))
-                return ResponseProvider.error("Contraseña incorrecta.", 404);
+                return ResponseProvider.error("Contraseña incorrecta.", 404, null);
 
             else {
                 
                 UsuarioDTO usuarioDto = new UsuarioDTO(
                         usuario.getId(),
                         usuario.getNombre(),
-                        usuario.getApellido()
+                        usuario.getApellido(),
+                        usuario.getRol_id()
                 );
                 
-                return ResponseProvider.success(usuarioDto, "Datos validados con éxito.", 200);
+                return ResponseProvider.success(usuarioDto, "Inicio de sesión exitoso.", 200);
             }
             
         } catch (JSONException e) {
@@ -242,6 +282,9 @@ public class usuarioService {
     }
     
     public static Response updateUsuario(int id, Usuario usuarioData) {
+        
+        boolean hashValido = true;
+        
         try {
            
            Response usuarioExistente = getUsuarioById(id);
@@ -251,19 +294,24 @@ public class usuarioService {
 
            if(existEmail(id, usuarioData)) return ResponseProvider.error("Este correo ya fué registrado.", 409);
            
-            //Se obtiene la contraseña del usuario
-            String contrasenaText = usuarioData.getContrasena();
-            // se hashea la contraseña
-            usuarioData.setContrasena(PasswordService.hashPassword(contrasenaText));
+           if(usuarioData.getContrasena() != null) {
+                //Se obtiene la contraseña del usuario
+                String contrasenaText = usuarioData.getContrasena();
+                // se hashea la contraseña
+                String hashContrasena =  PasswordService.hashPassword(contrasenaText);
+                
+                int rowsAffectedPswd = UsuarioDao.updateContrasena(id, hashContrasena);
+                
+                if(rowsAffectedPswd == 0) hashValido = false;
+           }
            
             // Intenta actualizar el usuario en la base de datos y devuelve el número de filas afectadas
-            int rowsAffected = UsuarioDao.updateUsuario(id, usuarioData);
+            int rowsAffectedUsuario = UsuarioDao.updateUsuario(id, usuarioData);
             
-            if (rowsAffected != 0){
-                
-                usuarioData.setId(id);
+            
+            if (rowsAffectedUsuario != 0 && hashValido){
                 // Si la actualización se realizó, se confirma el éxito con código 200 OK
-                return ResponseProvider.success(usuarioData, "Usuario actualizado con éxito.", 200);
+                return ResponseProvider.success(null, "Usuario actualizado con éxito.", 200);
             }
             else 
                 return ResponseProvider.error("Error al actualizar el usuario.", 400);
@@ -336,7 +384,7 @@ public class usuarioService {
             usuarioData.setContrasena(PasswordService.hashPassword(contrasenaText));
             
             // Ejecuta la actualización de la contraseña en la base de datos y recibe la cantidad de filas afectadas
-            int rowsAffected = UsuarioDao.updateContrasena(id, usuarioData);
+            int rowsAffected = UsuarioDao.updateContrasena(id, usuarioData.getContrasena());
             
             if (rowsAffected != 0) 
                 // Si contraseña actualizaa correctamente, devuelve código 204 No Content con mensaje
@@ -384,6 +432,27 @@ public class usuarioService {
         } catch (SQLException e) {
             return null;
         }
+    }
+    
+    public static Response softDeleteUsuario(int id) {
+        
+        try {
+            
+            // Ejecuta la eliminación de usuario en la base de datos y recibe la cantidad de filas afectadas
+            int rowsAffected = UsuarioDao.softDeleteUsuario(id);
+            
+            if (rowsAffected != 0) 
+                // Si usuario eliminado correctamente, devuelve código 204 No Content con mensaje
+                return ResponseProvider.success(null, "Usuario eliminado de forma segura.", 200);
+            else 
+                // Si no encontró usuario para eliminar, devuelve 404 Not Found con mensaje
+                return ResponseProvider.error("Este usuario no existe.", 404);
+            
+        } catch (Exception e) {
+            // Para cualquier error interno, retorna un error 500 con mensaje
+            return ResponseProvider.error("Error interno al eliminar el usuario.", 500);
+        }
+        
     }
     
     public static Response deleteUsario(int id) {

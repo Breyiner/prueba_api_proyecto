@@ -73,6 +73,36 @@ public class MovimientoController {
             return ResponseProvider.error("Error al obtener movimientos por categoría", 500);
         }
     }
+    
+    @GET
+    @Path("usuario/{usuario_id}/tipoMovimiento/{tipo_movimiento_id}/mes/{mes}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getMovimientosResumidos(
+        @PathParam("usuario_id") int usuario_id,
+        @PathParam("tipo_movimiento_id") int tipo_movimiento_id,
+        @PathParam("mes") int mes)
+    {
+        try {
+            return MovimientoService.getMovimientosResumidos(usuario_id, tipo_movimiento_id, mes);
+        } catch (Exception e) {
+            return ResponseProvider.error("Error al obtener movimientos por categoría", 500);
+        }
+    }
+    
+    @GET
+    @Path("usuario/{usuario_id}/tipoMovimiento/{tipo_movimiento_id}/fecha/{fecha}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getMovimientosByDate(
+        @PathParam("usuario_id") int usuario_id,
+        @PathParam("tipo_movimiento_id") int tipo_movimiento_id,
+        @PathParam("fecha") String fecha)
+    {
+        try {
+            return MovimientoService.getMovimientosByDate(usuario_id, tipo_movimiento_id, fecha);
+        } catch (Exception e) {
+            return ResponseProvider.error("Error al obtener movimientos por categoría", 500);
+        }
+    }
 
     @POST
     @Validar(entidad = "Movimiento")
