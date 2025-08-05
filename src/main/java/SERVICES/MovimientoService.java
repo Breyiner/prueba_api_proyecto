@@ -22,12 +22,18 @@ public class MovimientoService {
         try {
             ResultSet rs = MovimientoDao.getMovimientos();
             while (rs.next()) {
+                // Validar descripcion null
+                String descripcion = rs.getString("descripcion");
+                if (descripcion == null) {
+                    descripcion = "";
+                }
+                
                 Movimiento movimiento = new Movimiento(
                     rs.getInt("id"),
                     rs.getInt("usuario_id"),
                     rs.getString("nombre"),
                     rs.getBigDecimal("monto"),
-                    rs.getString("descripcion"),
+                    descripcion,
                     rs.getInt("categoria_id")
                 );
 
@@ -81,12 +87,18 @@ public class MovimientoService {
             ResultSet rs = MovimientoDao.getMovimientoById(id);
 
             while (rs.next()) {
+                // Validar descripcion null
+                String descripcion = rs.getString("descripcion");
+                if (descripcion == null) {
+                    descripcion = "";
+                }
+                
                 movimiento = new Movimiento(
                     rs.getInt("id"),
                     rs.getInt("usuario_id"),
                     rs.getString("nombre"),
                     rs.getBigDecimal("monto"),
-                    rs.getString("descripcion"),
+                    descripcion,
                     rs.getInt("categoria_id")
                 );
 
@@ -112,12 +124,18 @@ public class MovimientoService {
             ResultSet rs = MovimientoDao.getMovimientosByUserId(id, usuario_id);
 
             while (rs.next()) {
+                // Validar descripcion null
+                String descripcion = rs.getString("descripcion");
+                if (descripcion == null) {
+                    descripcion = "";
+                }
+                
                 Movimiento movimiento = new Movimiento(
                     rs.getInt("id"),
                     rs.getInt("usuario_id"),
                     rs.getString("nombre"),
                     rs.getBigDecimal("monto"),
-                    rs.getString("descripcion"),
+                    descripcion,
                     rs.getInt("categoria_id")
                 );
                 
@@ -244,6 +262,7 @@ public class MovimientoService {
     public static Response createMovimiento(Movimiento movimientoData) {
         ResultSet rs = null;
         try {
+            
             int idGenerado = 0;
             if(movimientoData.getFecha_creacion() == null) {
                 rs = MovimientoDao.createMovimiento(movimientoData);
@@ -262,7 +281,7 @@ public class MovimientoService {
             if (idGenerado == 0) {
                 return ResponseProvider.error("Error al crear el movimiento.", 400);
             } else {
-                return ResponseProvider.success(movimientoData, "Movimiento creado con éxito.", 200);
+                return ResponseProvider.success(null, "Movimiento creado con éxito.", 200);
             }
 
         } catch (SQLException e) {
@@ -281,7 +300,7 @@ public class MovimientoService {
 
             if (filasAfectadas != 0) {
                 movimientoData.setId(id);
-                return ResponseProvider.success(movimientoData, "Movimiento actualizado con éxito.", 200);
+                return ResponseProvider.success(null, "Movimiento actualizado con éxito.", 200);
             } else {
                 return ResponseProvider.error("Error al actualizar el movimiento.", 400);
             }
@@ -289,6 +308,24 @@ public class MovimientoService {
         } catch (Exception e) {
             return ResponseProvider.error("Error interno al actualizar el movimiento.", 500);
         }
+    }
+    
+    public static Response softDeleteMovimiento(int id) {
+        
+        try {
+            
+            int rowsAffected = MovimientoDao.softDeleteMovimiento(id);
+            
+            if (rowsAffected != 0) 
+                return ResponseProvider.success(null, "Movimiento eliminado de forma segura.", 200);
+            else 
+                return ResponseProvider.error("Este movimiento no existe.", 404);
+            
+        } catch (Exception e) {
+            // Para cualquier error interno, retorna un error 500 con mensaje
+            return ResponseProvider.error("Error interno al eliminar el movimiento.", 500);
+        }
+        
     }
 
     public static Response deleteMovimiento(int id, int usuario_id) {

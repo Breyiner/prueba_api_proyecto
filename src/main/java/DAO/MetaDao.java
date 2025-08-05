@@ -48,7 +48,9 @@ public class MetaDao {
                                COALESCE(SUM(apm.monto), 0) AS total
                            FROM metas AS m
                            LEFT JOIN aportes_metas AS apm ON m.id = apm.meta_id
+                                AND apm.estado_id = 1
                            WHERE m.usuario_id = ?
+                                AND m.estado_id = 1
                            GROUP BY
                                m.id, m.nombre, m.monto, m.fecha_limite, m.fecha_creacion, m.completada
                            ORDER BY
@@ -76,7 +78,9 @@ public class MetaDao {
                                COALESCE(SUM(apm.monto), 0) AS total
                            FROM metas AS m
                            LEFT JOIN aportes_metas AS apm ON m.id = apm.meta_id
-                           WHERE m.id = ?;
+                           WHERE m.id = ?
+                                AND m.estado_id = 1
+                                AND apm.estado_id = 1;
                            """;
             
             PreparedStatement pstm = connection.prepareStatement(query);
@@ -105,8 +109,11 @@ public class MetaDao {
                            FROM metas m
                            LEFT JOIN aportes_metas a ON 
                                m.id = a.meta_id
+                               AND a.estado_id = 1
                            WHERE 
-                               m.id = ? AND m.usuario_id = ?
+                               m.id = ?
+                               AND m.usuario_id = ?
+                               AND m.estado_id = 1
                            GROUP BY 
                                m.id, m.nombre, m.descripcion, m.monto, m.fecha_creacion, m.completada, m.fecha_limite;
                            """;
@@ -123,7 +130,7 @@ public class MetaDao {
     public static ResultSet getMetaById(int id) {
         Connection connection = ConnectionDB.connect();
         try {
-            PreparedStatement pstm = connection.prepareStatement("SELECT * FROM metas WHERE id = ?");
+            PreparedStatement pstm = connection.prepareStatement("SELECT * FROM metas WHERE id = ? AND estado_id = 1");
             pstm.setInt(1, id);
             return pstm.executeQuery();
         } catch (SQLException e) {
@@ -175,6 +182,27 @@ public class MetaDao {
             return pstm.executeUpdate();
         } catch (SQLException e) {
             throw new Error("Error al actualizar el estado de completada");
+        }
+    }
+    
+    public static int softDeleteMeta(int id) {
+        Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
+        
+        String query = "UPDATE metas SET estado_id = 2 WHERE id = ?";
+        
+        try {
+            
+            PreparedStatement pstm = connection.prepareStatement(query);
+            
+            // Establece los nuevos valores del usuario en la consulta
+            pstm.setInt(1, id);
+            
+            int affectedRow = pstm.executeUpdate(); // Ejecuta la actualización y obtiene el número de filas afectadas
+            
+            return affectedRow; // Devuelve el número de filas afectadas
+            
+        } catch (SQLException e) {
+            throw new Error("Error al eliminar de forma segura el movimiento");
         }
     }
 

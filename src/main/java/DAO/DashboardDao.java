@@ -22,6 +22,7 @@ public class DashboardDao {
                               AND MONTH(m.fecha_creacion) = ?
                            WHERE
                               tm.id != 3
+                              AND m.estado_id = 1
                            GROUP BY 
                               tm.id, tm.icono, tm.color, tm.nombre
                            ORDER BY 
@@ -33,6 +34,7 @@ public class DashboardDao {
             pstm.setInt(2, mes);
             return pstm.executeQuery();
         } catch (SQLException e) {
+            System.out.println(e);
             throw new Error("Error al obtener el resumen de movimientos");
         }
     }
@@ -53,6 +55,8 @@ public class DashboardDao {
                               AND MONTH(apm.fecha_creacion) = ?
                            WHERE
                               tm.id = 3
+                              AND m.estado_id = 1
+                              AND apm.estado_id = 1
                            GROUP BY 
                               tm.id, tm.icono, tm.color, tm.nombre
                            ORDER BY 
@@ -89,6 +93,7 @@ public class DashboardDao {
                                m.usuario_id = ?
                                AND tm.id = ?
                                AND MONTH(m.fecha_creacion) = ?
+                               AND m.estado_id = 1
                            GROUP BY 
                                cat.id, tm.id, cat.icono, cat.nombre, tm.color, tm.color_bg
                            ORDER BY 
@@ -125,6 +130,8 @@ public class DashboardDao {
                            WHERE 
                                m.usuario_id = ?
                                AND MONTH(apm.fecha_creacion) = ?
+                               AND apm.estado_id = 1
+                               AND m.estado_id = 1
                            GROUP BY 
                                 m.id, tm.icono, tm.color, tm.color_bg, m.nombre
                            ORDER BY 

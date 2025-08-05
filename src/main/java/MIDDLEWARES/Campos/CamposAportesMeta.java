@@ -12,7 +12,7 @@ public class CamposAportesMeta {
         
         campos.add(new Campo("meta_id", true, 1, 11, "number", null));
         campos.add(new Campo("monto", true, 3, 15, "number", null));
-        campos.add(new Campo("descripcion", true, 5, 50, "string", null));
+        campos.add(new Campo("descripcion", false, 5, 50, "string", null));
         
         return campos;
     }

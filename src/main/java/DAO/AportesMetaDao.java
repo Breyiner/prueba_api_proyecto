@@ -36,7 +36,7 @@ public class AportesMetaDao {
     public static ResultSet getAportesByMetaId(int meta_id) {
         Connection connection = ConnectionDB.connect();
         try {
-            PreparedStatement pstm = connection.prepareStatement("SELECT * FROM aportes_metas WHERE meta_id = ? ORDER BY fecha_creacion DESC");
+            PreparedStatement pstm = connection.prepareStatement("SELECT * FROM aportes_metas WHERE meta_id = ? AND estado_id = 1 ORDER BY fecha_creacion DESC");
             pstm.setInt(1, meta_id);
             return pstm.executeQuery();
         } catch (SQLException e) {
@@ -47,7 +47,7 @@ public class AportesMetaDao {
     public static ResultSet getAporteById(int id) {
         Connection connection = ConnectionDB.connect();
         try {
-            PreparedStatement pstm = connection.prepareStatement("SELECT * FROM aportes_metas WHERE id = ?");
+            PreparedStatement pstm = connection.prepareStatement("SELECT * FROM aportes_metas WHERE id = ? AND estado_id = 1");
             pstm.setInt(1, id);
             return pstm.executeQuery();
         } catch (SQLException e) {
@@ -76,6 +76,7 @@ public class AportesMetaDao {
                 AND tm.id = 3
                 AND m.usuario_id = ?
                 AND MONTH(apm.fecha_creacion) = ?
+                AND apm.estado_id = 1
             GROUP BY 
                 apm.id, m.id, tm.icono, tm.color, tm.color_bg, m.nombre, apm.fecha_creacion, apm.monto
             ORDER BY 
@@ -113,6 +114,7 @@ public class AportesMetaDao {
                 m.id = ?
                 AND tm.id = 3
                 AND m.usuario_id = ?
+                AND apm.estado_id = 1
             GROUP BY 
                 apm.id, m.id, tm.icono, tm.color, tm.color_bg, m.nombre, apm.fecha_creacion, apm.monto
             ORDER BY 
@@ -142,7 +144,8 @@ public class AportesMetaDao {
                        INNER JOIN tipos_movimiento AS tm ON tm.id = 3
                        WHERE
                        	m.usuario_id = ?
-                           AND MONTH(apm.fecha_creacion) = ?
+                        AND MONTH(apm.fecha_creacion) = ?
+                        AND apm.estado_id = 1
                        ORDER BY
                        	apm.id DESC;
                        """;
@@ -154,6 +157,39 @@ public class AportesMetaDao {
             return pstm.executeQuery();
         } catch (SQLException e) {
             throw new Error("Error al obtener los aportes resumidos");
+        }
+    }
+    
+    public static ResultSet getAportesByDate(int usuario_id, String fecha) {
+        Connection connection = ConnectionDB.connect();
+        String query = """
+                       SELECT 
+                           apm.id,
+                           m.nombre,
+                           apm.monto,
+                           tm.icono,
+                           tm.color,
+                           tm.color_bg,
+                           apm.fecha_creacion
+                        FROM aportes_metas apm
+                        INNER JOIN metas m on m.id = apm.meta_id
+                        INNER JOIN tipos_movimiento tm on tm.id = 3
+                        WHERE 
+                            m.usuario_id = ?
+                           AND DATE(m.fecha_creacion) = ?
+                           AND m.estado_id = 1
+                           AND apm.estado_id = 1
+                        ORDER BY
+                        m.id DESC;
+                       """;
+        try {
+            PreparedStatement pstm = connection.prepareStatement(query);
+            pstm.setInt(1, usuario_id);
+            pstm.setString(2, fecha);
+           
+            return pstm.executeQuery();
+        } catch (SQLException e) {
+            throw new Error("Error al obtener los aportes");
         }
     }
 
@@ -184,6 +220,27 @@ public class AportesMetaDao {
             return pstm.executeUpdate();
         } catch (SQLException e) {
             throw new Error("Error al actualizar el aporte");
+        }
+    }
+    
+    public static int softDeleteAportes(int id) {
+        Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
+        
+        String query = "UPDATE aportes_metas SET estado_id = 2 WHERE id = ?";
+        
+        try {
+            
+            PreparedStatement pstm = connection.prepareStatement(query);
+            
+            // Establece los nuevos valores del usuario en la consulta
+            pstm.setInt(1, id);
+            
+            int affectedRow = pstm.executeUpdate(); // Ejecuta la actualización y obtiene el número de filas afectadas
+            
+            return affectedRow; // Devuelve el número de filas afectadas
+            
+        } catch (SQLException e) {
+            throw new Error("Error al eliminar de forma segura el movimiento");
         }
     }
 

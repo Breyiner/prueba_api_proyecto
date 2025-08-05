@@ -1,6 +1,7 @@
 package CONTROLLER; // Paquete que contiene el controlador de usuarios
 
 import MIDDLEWARES.Validar;
+import MODEL.PasswordDTO;
 import MODEL.Usuario; // Importa la clase Usuario que representa la entidad de usuario
 import MODEL.UsuarioLoginDTO;
 import PROVIDERS.ResponseProvider;
@@ -121,26 +122,14 @@ public class UserController {
         }
     }
     
-    @POST
-    @Path("/validatePassword/{id}")
-    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
-    @Consumes(MediaType.APPLICATION_JSON) // Indica que el método acepta datos en formato JSON
-    public Response validatePassword(@PathParam("id") int id, Usuario usuarioData) {
-        
-        try {
-            return usuarioService.validatePassword(id, usuarioData);
-        } catch (Exception e) {
-           return ResponseProvider.error("Error al validar la contraseña", 500);
-        }
-    }
     
     @PATCH // Indica que este método responde a solicitudes PUT
-    @Path("/password/{id}") // Ruta con el ID del usuario a actualizar
+    @Path("/password/usuario/{usuario_id}") // Ruta con el ID del usuario a actualizar
     @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
     @Consumes(MediaType.APPLICATION_JSON) // Indica que el método acepta datos en formato JSON
-    public Response updateContrasena(@PathParam("id") int id, Usuario usuarioData) {
+    public Response updateContrasena(@PathParam("usuario_id") int usuario_id, PasswordDTO passwordData) {
         try {
-            return usuarioService.updateContrasena(id, usuarioData);
+            return usuarioService.updateContrasena(usuario_id, passwordData);
         } catch (Exception e) {
            return ResponseProvider.error("Error al actualizar la contraseña", 500);
         }

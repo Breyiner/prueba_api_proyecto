@@ -24,12 +24,18 @@ public class MetaService {
         try {
             ResultSet rs = MetaDao.getMetas();
             while (rs.next()) {
+                // Validar descripcion null
+                String descripcion = rs.getString("descripcion");
+                if (descripcion == null) {
+                    descripcion = "";
+                }
+                
                 Meta meta = new Meta(
                     rs.getInt("id"),
                     rs.getInt("usuario_id"),
                     rs.getString("nombre"),
                     rs.getBigDecimal("monto"),
-                    rs.getString("descripcion"),
+                    descripcion,
                     rs.getString("fecha_limite")
                 );
                 meta.setFecha_creacion(rs.getString("fecha_creacion").substring(0, 10));
@@ -158,10 +164,16 @@ public class MetaService {
         try {
             ResultSet rs = MetaDao.getMetasCantMovimientos(id, usuario_id);
             while (rs.next()) {
+                // Validar descripcion null
+                String descripcion = rs.getString("descripcion");
+                if (descripcion == null) {
+                    descripcion = "";
+                }
+                
                 meta = new MetaDetalleDTO(
                     rs.getInt("id"),
                     rs.getString("nombre"),
-                    rs.getString("descripcion"),
+                    descripcion,
                     rs.getBigDecimal("monto"),
                     rs.getBigDecimal("total"),
                     rs.getString("fecha_creacion").substring(0, 10),
@@ -195,12 +207,18 @@ public class MetaService {
         try {
             ResultSet rs = MetaDao.getMetaById(id);
             while (rs.next()) {
+                // Validar descripcion null
+                String descripcion = rs.getString("descripcion");
+                if (descripcion == null) {
+                    descripcion = "";
+                }
+                
                 meta = new Meta(
                     rs.getInt("id"),
                     rs.getInt("usuario_id"),
                     rs.getString("nombre"),
                     rs.getBigDecimal("monto"),
-                    rs.getString("descripcion"),
+                    descripcion,
                     rs.getString("fecha_limite")
                 );
                 meta.setFecha_creacion(rs.getString("fecha_creacion").substring(0, 10));
@@ -221,6 +239,8 @@ public class MetaService {
 
     public static Response createMeta(Meta metaData) {
         try {
+            
+            if(metaData.getDescripcion() == null) metaData.setDescripcion("");
             int idGenerado = 0;
             ResultSet rs = MetaDao.createMeta(metaData);
 
@@ -243,6 +263,8 @@ public class MetaService {
 
     public static Response updateMeta(int id, int usuario_id, Meta metaData) {
         try {
+            if(metaData.getDescripcion() == null) metaData.setDescripcion("");
+            
             Response existente = getMetaById(id);
             if (existente.getStatus() == 404)
                 return ResponseProvider.error("La meta no existe.", 404);
@@ -279,6 +301,24 @@ public class MetaService {
         } catch (Exception e) {
             return ResponseProvider.error("Error interno al actualizar el campo 'completada'.", 500);
         }
+    }
+    
+    public static Response softDeleteMeta(int id) {
+        
+        try {
+            
+            int rowsAffected = MetaDao.softDeleteMeta(id);
+            
+            if (rowsAffected != 0) 
+                return ResponseProvider.success(null, "Meta eliminada de forma segura.", 200);
+            else 
+                return ResponseProvider.error("Esta meta no existe.", 404);
+            
+        } catch (Exception e) {
+            // Para cualquier error interno, retorna un error 500 con mensaje
+            return ResponseProvider.error("Error interno al eliminar la meta.", 500);
+        }
+        
     }
 
     public static Response deleteMeta(int id, int usuario_id) {

@@ -236,7 +236,7 @@ public class UsuarioDao {
         }
     }
     
-    public static int updateContrasena(int id, String contrasena) {
+    public static int updateContrasena(int usuario_id, String contrasena) {
         Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
         
         // Consulta SQL para actualizar los datos del usuario
@@ -248,7 +248,7 @@ public class UsuarioDao {
             
             // Establece los nuevos valores del usuario en la consulta
             pstm.setString(1, contrasena);
-            pstm.setInt(2, id); // Establece el ID del usuario a actualizar
+            pstm.setInt(2, usuario_id); // Establece el ID del usuario a actualizar
             
             int affectedRow = pstm.executeUpdate(); // Ejecuta la actualización y obtiene el número de filas afectadas
             

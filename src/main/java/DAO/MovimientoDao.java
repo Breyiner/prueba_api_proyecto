@@ -39,7 +39,7 @@ public class MovimientoDao {
     public static ResultSet getMovimientoById(int id) {
         Connection connection = ConnectionDB.connect();
         try {
-            PreparedStatement pstm = connection.prepareStatement("SELECT * FROM movimientos WHERE id = ?");
+            PreparedStatement pstm = connection.prepareStatement("SELECT * FROM movimientos WHERE id = ? AND estado_id = 1");
             pstm.setInt(1, id);
             return pstm.executeQuery();
         } catch (SQLException e) {
@@ -95,6 +95,7 @@ public class MovimientoDao {
                             AND cat.id = ?
                             AND tm.id = ?
                             AND MONTH(m.fecha_creacion) = ?
+                            AND m.estado_id = 1
                         ORDER BY 
                             m.fecha_creacion desc
                         """;
@@ -129,6 +130,7 @@ public class MovimientoDao {
                             m.usuario_id = ?
                             AND tm.id = ?
                             AND MONTH(m.fecha_creacion) = ?
+                            AND m.estado_id = 1
                         ORDER BY 
                             m.fecha_creacion desc;
                        """;
@@ -165,6 +167,7 @@ public class MovimientoDao {
                        	m.usuario_id = ?
                            AND tm.id = ?
                            AND DATE(m.fecha_creacion) = ?
+                           AND m.estado_id = 1
                        ORDER BY
                        	m.id DESC;
                        """;
@@ -229,6 +232,27 @@ public class MovimientoDao {
             return pstm.executeUpdate();
         } catch (SQLException e) {
             throw new Error("Error al actualizar el movimiento");
+        }
+    }
+    
+    public static int softDeleteMovimiento(int id) {
+        Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
+        
+        String query = "UPDATE movimientos SET estado_id = 2 WHERE id = ?";
+        
+        try {
+            
+            PreparedStatement pstm = connection.prepareStatement(query);
+            
+            // Establece los nuevos valores del usuario en la consulta
+            pstm.setInt(1, id);
+            
+            int affectedRow = pstm.executeUpdate(); // Ejecuta la actualización y obtiene el número de filas afectadas
+            
+            return affectedRow; // Devuelve el número de filas afectadas
+            
+        } catch (SQLException e) {
+            throw new Error("Error al eliminar de forma segura el movimiento");
         }
     }
 

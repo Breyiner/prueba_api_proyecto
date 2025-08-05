@@ -97,6 +97,20 @@ public class AportesMetaController {
             return ResponseProvider.error("Error al obtener los aportes", 500);
         }
     }
+    
+    @GET
+    @Path("resumidos/usuario/{usuario_id}/fecha/{fecha}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAportesResumidosByMeta(
+        @PathParam("usuario_id") int usuario_id,
+        @PathParam("fecha") String fecha)
+    {
+        try {
+            return AportesMetaService.getAportesByDate(usuario_id, fecha);
+        } catch (Exception e) {
+            return ResponseProvider.error("Error al obtener los aportes", 500);
+        }
+    }
 
     @POST
     @Validar(entidad = "AportesMeta")
@@ -123,6 +137,18 @@ public class AportesMetaController {
             return AportesMetaService.updateAporte(id, meta_id, aporteData);
         } catch (Exception e) {
             return ResponseProvider.error("Error al actualizar el aporte", 500);
+        }
+    }
+    
+    @DELETE // Indica que este método responde a solicitudes DELETE
+    @Path("soft/{id}")
+    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
+    public Response softDeleteAporte(@PathParam("id") int id) {
+     
+        try {
+            return AportesMetaService.softDeleteAporte(id);
+        } catch (Exception e) {
+           return ResponseProvider.error("Error al eliminar el aporte", 500);
         }
     }
 

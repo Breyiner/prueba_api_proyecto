@@ -132,6 +132,18 @@ public class MovimientoController {
         }
     }
 
+    @DELETE // Indica que este método responde a solicitudes DELETE
+    @Path("soft/{id}") 
+    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
+    public Response softDeleteMovimiento(@PathParam("id") int id) {
+     
+        try {
+            return MovimientoService.softDeleteMovimiento(id);
+        } catch (Exception e) {
+           return ResponseProvider.error("Error al eliminar el movimiento", 500);
+        }
+    }
+    
     @DELETE
     @Path("/{id}/usuario/{usuario_id}")
     @Produces(MediaType.APPLICATION_JSON)

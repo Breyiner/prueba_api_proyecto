@@ -98,6 +98,18 @@ public class MetaController {
             return ResponseProvider.error("Error al actualizar la meta", 500);
         }
     }
+    
+    @DELETE // Indica que este método responde a solicitudes DELETE
+    @Path("soft/{id}") 
+    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
+    public Response softDeleteMeta(@PathParam("id") int id) {
+     
+        try {
+            return MetaService.softDeleteMeta(id);
+        } catch (Exception e) {
+           return ResponseProvider.error("Error al eliminar la meta", 500);
+        }
+    }
 
     @DELETE
     @Path("/{id}/usuario/{usuario_id}")

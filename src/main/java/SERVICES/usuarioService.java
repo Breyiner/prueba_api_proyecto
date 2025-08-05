@@ -2,6 +2,7 @@ package SERVICES;
 
 import DAO.UsuarioDao;
 import MODEL.CantidadRegistrosDTO;
+import MODEL.PasswordDTO;
 import MODEL.Usuario;
 import MODEL.UsuarioDTO;
 import MODEL.UsuarioLoginDTO;
@@ -342,7 +343,7 @@ public class usuarioService {
                 
                 usuarioData.setId(id);
                 // Si la actualización se realizó, se confirma el éxito con código 200 OK
-                return ResponseProvider.success(usuarioParcial, "Usuario actualizado con éxito.", 200);
+                return ResponseProvider.success(null, "Usuario actualizado con éxito.", 200);
             }
             else 
                 return ResponseProvider.error("Error al actualizar el usuario.", 400);
@@ -353,45 +354,47 @@ public class usuarioService {
         }
     }
     
-    public static Response validatePassword(int id, Usuario usuarioData) {
+    public static boolean validatePassword(int usuario_id, String passwordText) {
         try {
             
-            String contrasenaHash = obtenerContrasena(id);
+            String contrasenaHash = obtenerContrasena(usuario_id);
             
-            if(contrasenaHash == null) return ResponseProvider.error("Usuario no encontrado.", 404);
+            if(contrasenaHash == null) return false;
             
-            if(!PasswordService.checkPassword(
-                    usuarioData.getContrasena(), 
+            return !PasswordService.checkPassword(
+                    passwordText, 
                     contrasenaHash
-            ))
-                return ResponseProvider.error("Contraseña incorrecta.", 404);
+            );
             
-            else {
-                return ResponseProvider.success(null, "Contraseña válida.", 200);
-            }
         } catch (Exception e) {
             System.out.println(e);
-            return ResponseProvider.error("Error interno al validar la contraseña.", 500);
+            return false;
         }
     }
     
-    public static Response updateContrasena(int id, Usuario usuarioData) {
+    public static Response updateContrasena(int usuario_id, PasswordDTO passwordData) {
         try {
             
+            if(!passwordData.getNew_password().equals(passwordData.getConfirm_password()))
+                return ResponseProvider.error("Las contraseñas no coinciden.", 400, null);
+            
             //Se obtiene la contraseña del usuario
-            String contrasenaText = usuarioData.getContrasena();
+            boolean passwordValid = validatePassword(usuario_id, passwordData.getOld_password());
+            
+            if(!passwordValid) return ResponseProvider.error("Contraseña incorrecta.", 400, null);
+            
             // se hashea la contraseña
-            usuarioData.setContrasena(PasswordService.hashPassword(contrasenaText));
+            String hashPassword = PasswordService.hashPassword(passwordData.getNew_password());
             
             // Ejecuta la actualización de la contraseña en la base de datos y recibe la cantidad de filas afectadas
-            int rowsAffected = UsuarioDao.updateContrasena(id, usuarioData.getContrasena());
+            int rowsAffected = UsuarioDao.updateContrasena(usuario_id, hashPassword);
             
             if (rowsAffected != 0) 
                 // Si contraseña actualizaa correctamente, devuelve código 204 No Content con mensaje
                 return ResponseProvider.success(null, "Contraseña actualizada con éxito.", 200);
             else 
                 // Si no encontró usuario para actualizar contraseña, devuelve 404 Not Found con mensaje
-                return ResponseProvider.error("Este usuario no existe.", 404);
+                return ResponseProvider.error("Este usuario no existe.", 404, null);
             
         } catch(Exception e) {
             return ResponseProvider.error("Error interno al actualizar la contraseña.", 500);

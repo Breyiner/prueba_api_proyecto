@@ -37,8 +37,8 @@ public class ValidarCampos {
                         String valor = (String) valueProperty;
                         int longitud = valor.length();
                         
-                        if(longitud < minLength) errores.add("El campo " + name + " debe tener mínimo " + minLength + "caracteres.");
-                        if(longitud > maxLength) errores.add("El campo " + name + " debe tener máximo " + maxLength + "caracteres.");
+                        if(longitud < minLength) errores.add("El campo " + name + " debe tener mínimo " + minLength + " caracteres.");
+                        if(longitud > maxLength) errores.add("El campo " + name + " debe tener máximo " + maxLength + " caracteres.");
                     
                         if(regExp != null && !valor.matches(regExp)) {
                             errores.add("El campo " + name + " no tiene el formato correcto.");
