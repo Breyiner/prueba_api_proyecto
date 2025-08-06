@@ -99,6 +99,7 @@ public class UserController {
     }
 
     @PUT // Indica que este método responde a solicitudes PUT
+    @Validar(entidad = "Usuario")
     @Path("/{id}") // Ruta con el ID del usuario a actualizar
     @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
     @Consumes(MediaType.APPLICATION_JSON) // Indica que el método acepta datos en formato JSON
@@ -110,7 +111,8 @@ public class UserController {
         }
     }
     
-    @PATCH // Indica que este método responde a solicitudes PUT
+    @PATCH // Indica que este método responde a solicitudes PATCH
+    @Validar(entidad = "UsuarioPerfil")
     @Path("/{id}") // Ruta con el ID del usuario a actualizar
     @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
     @Consumes(MediaType.APPLICATION_JSON) // Indica que el método acepta datos en formato JSON

@@ -84,6 +84,7 @@ public class MetaController {
     }
 
     @PUT
+    @Validar(entidad = "Meta")
     @Path("/{id}/usuario/{usuario_id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

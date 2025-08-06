@@ -125,6 +125,7 @@ public class AportesMetaController {
     }
 
     @PUT
+    @Validar(entidad = "AportesMeta")
     @Path("/{id}/meta/{meta_id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

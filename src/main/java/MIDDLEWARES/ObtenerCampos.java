@@ -11,6 +11,7 @@ import MIDDLEWARES.Campos.CamposRol;
 import MIDDLEWARES.Campos.CamposTiposMovimiento;
 import MIDDLEWARES.Campos.CamposUsuarioLogin;
 import MIDDLEWARES.Campos.CamposUsuario;
+import MIDDLEWARES.Campos.CamposUsuarioPerfil;
 import java.util.List;
 
 public class ObtenerCampos {
@@ -29,6 +30,7 @@ public class ObtenerCampos {
             case "movimiento" -> CamposMovimiento.getCampos();
             case "meta" -> CamposMeta.getCampos();
             case "aportesmeta" -> CamposAportesMeta.getCampos();
+            case "usuarioperfil" -> CamposUsuarioPerfil.getCampos();
             default -> null;
         };
     }

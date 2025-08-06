@@ -117,6 +117,7 @@ public class MovimientoController {
     }
 
     @PUT
+    @Validar(entidad = "Movimiento")
     @Path("/{id}/usuario/{usuario_id}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
