@@ -4,16 +4,17 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigDecimal;
 
 public class AportesMeta {
-    private int id;
-    private int meta_id;
-    private BigDecimal monto;
-    private String descripcion;
+    private int id;                    // Identificador único del aporte
+    private int meta_id;               // ID de la meta a la que pertenece el aporte
+    private BigDecimal monto;          // Valor del aporte
+    private String descripcion;        // Descripción opcional del aporte
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
-    private String fecha_creacion;
+    private String fecha_creacion;    // Fecha de creación con formato y zona horaria
 
-    // Constructores
+    // Constructor vacío requerido por frameworks o serialización
     public AportesMeta() {}
 
+    // Constructor sin fecha de creación
     public AportesMeta(int id, int meta_id, BigDecimal monto, String descripcion) {
         this.id = id;
         this.meta_id = meta_id;
@@ -21,6 +22,7 @@ public class AportesMeta {
         this.descripcion = descripcion;
     }
 
+    // Constructor completo con fecha de creación
     public AportesMeta(int id, int meta_id, BigDecimal monto, String descripcion, String fecha_creacion) {
         this.id = id;
         this.meta_id = meta_id;
@@ -29,7 +31,7 @@ public class AportesMeta {
         this.fecha_creacion = fecha_creacion;
     }
 
-    // Getters y Setters
+    // Getters y setters para manipular atributos
     public int getId() {
         return id;
     }

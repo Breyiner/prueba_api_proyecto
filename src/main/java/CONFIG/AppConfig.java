@@ -9,7 +9,7 @@ public class AppConfig extends ResourceConfig {
     
     public AppConfig() {
         
-        packages("CONTROLLER", "CONFIG", "MIDDLEWARES");
+        packages("CONTROLLER", "CONFIG");
         ConnectionDB.connect();
     }
 }

@@ -25,6 +25,7 @@ public class UsuarioTablaDTO {
         this.estado = estado;
     }
 
+    // Getters y setters
     public int getId() {
         return id;
     }

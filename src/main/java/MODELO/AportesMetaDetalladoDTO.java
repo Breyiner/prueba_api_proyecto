@@ -5,20 +5,20 @@ import java.math.BigDecimal;
 import java.sql.Date;
 
 public class AportesMetaDetalladoDTO {
-    private int id;
-    private int meta_id;
-    private String icono;
-    private String color;
-    private String color_bg;
-    private String nombre;
+    private int id;                      // ID del aporte detallado
+    private int meta_id;                 // ID de la meta a la que pertenece
+    private String icono;                // Icono asociado (por ejemplo, categoría)
+    private String color;                // Color asociado al tipo o categoría
+    private String color_bg;             // Color de fondo para UI
+    private String nombre;               // Nombre descriptivo del aporte
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
-    private String fecha_creacion;
-    private BigDecimal monto;
+    private String fecha_creacion;      // Fecha de creación, formato ISO yyyy-MM-dd
+    private BigDecimal monto;            // Monto aportado (valor decimal)
 
-    // Constructor vacío
+    // Constructor vacío para frameworks y serialización
     public AportesMetaDetalladoDTO() {}
 
-    // Constructor completo
+    // Constructor completo con todos los campos
     public AportesMetaDetalladoDTO(int id, int meta_id, String icono, 
                                   String color, String color_bg, String nombre, String fecha_creacion, 
                                   BigDecimal monto) {
@@ -32,7 +32,7 @@ public class AportesMetaDetalladoDTO {
         this.monto = monto;
     }
 
-    // Getters y Setters
+    // Getters y setters: acceso y modificación controlada de los campos
     public int getId() {
         return id;
     }

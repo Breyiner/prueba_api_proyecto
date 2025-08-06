@@ -6,18 +6,35 @@ import java.sql.Date;
 
 public class MovimientoDetalleDTO {
     
+    // Identificador único del movimiento
     private int id;
+
+    // Icono representativo para la categoría o tipo del movimiento
     private String icono;
+
+    // Nombre de la categoría a la que pertenece el movimiento
     private String categoria;
+
+    // Color principal asociado (para UI o visualización)
     private String color;
+
+    // Color de fondo asociado (para UI o visualización)
     private String color_bg;
+
+    // Nombre o descripción del movimiento
     private String nombre;
+
+    // Fecha de creación del movimiento, formateada como String yyyy-MM-dd para JSON
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
     private String fecha_creacion;
+
+    // Valor monetario o cantidad asociada al movimiento
     private BigDecimal monto;
     
+    // Constructor vacío necesario para frameworks y serialización
     public MovimientoDetalleDTO() {}
 
+    // Constructor completo para inicializar el objeto con todos los atributos
     public MovimientoDetalleDTO(int id, String icono, String categoria, String color, String color_bg, String nombre, String fecha_creacion, BigDecimal monto) {
         this.id = id;
         this.icono = icono;
@@ -29,6 +46,8 @@ public class MovimientoDetalleDTO {
         this.monto = monto;
     }
 
+    // Getters y setters para cada atributo, permiten acceder y modificar los valores
+    
     public String getColor_bg() {
         return color_bg;
     }
@@ -37,8 +56,6 @@ public class MovimientoDetalleDTO {
         this.color_bg = color_bg;
     }
 
-    
-    
     public int getId() {
         return id;
     }

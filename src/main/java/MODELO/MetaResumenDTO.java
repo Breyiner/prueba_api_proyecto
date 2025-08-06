@@ -2,23 +2,30 @@ package MODELO;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigDecimal;
-import java.sql.Date;
 
 public class MetaResumenDTO {
     
-    private int id;
-    private String nombre;
-    private BigDecimal monto;
+    // Campos privados para encapsulación de datos de resumen de una meta
+    private int id;                       // ID único de la meta
+    private String nombre;                // Nombre descriptivo de la meta
+    private BigDecimal monto;             // Monto objetivo definido para la meta
+
+    // Fecha límite para alcanzar la meta, con formato JSON estandarizado yyyy-MM-dd y zona UTC
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
     private String fecha_limite;
+
+    // Fecha de creación de la meta, formateada igual que fecha_limite
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
     private String fecha_creacion;
-    private BigDecimal total;
-    private boolean completada;
-    private String mensaje;
 
+    private BigDecimal total;             // Total acumulado o aportado hasta el momento
+    private boolean completada;           // Estado de la meta: si está completada o no
+    private String mensaje;               // Mensaje opcional (ej: notificación o estado extra)
+
+    // Constructor vacío para frameworks y serialización
     public MetaResumenDTO() {}
 
+    // Constructor completo para crear instancia con todos los datos excepto mensaje
     public MetaResumenDTO(int id, String nombre, BigDecimal monto, String fecha_limite, String fecha_creacion, BigDecimal total, boolean completada) {
         this.id = id;
         this.nombre = nombre;
@@ -28,6 +35,8 @@ public class MetaResumenDTO {
         this.total = total;
         this.completada = completada;
     }
+
+    // Getters y setters: acceso y modificación segura de cada propiedad
 
     public boolean isCompletada() {
         return completada;

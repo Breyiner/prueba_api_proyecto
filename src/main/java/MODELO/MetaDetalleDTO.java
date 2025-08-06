@@ -2,24 +2,26 @@ package MODELO;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigDecimal;
-import java.sql.Date;
 
 public class MetaDetalleDTO {
   
-    public int id;
-    public String nombre;
-    public String descripcion;
-    public BigDecimal monto;
-    public BigDecimal total;
+    // Campos públicos que representan detalles de una meta con datos financieros y fechas
+    public int id;                        // ID único de la meta
+    public String nombre;                 // Nombre de la meta
+    public String descripcion;            // Descripción de la meta
+    public BigDecimal monto;              // Monto objetivo o esperado para la meta
+    public BigDecimal total;              // Total acumulado o aportado hasta ahora
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
-    public String fecha_creacion;
+    public String fecha_creacion;         // Fecha de creación de la meta, formato JSON yyyy-MM-dd
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
-    public String fecha_limite;
-    public int cantidad_aportes;
-    public String estado;
+    public String fecha_limite;           // Fecha límite para alcanzar la meta, formato JSON yyyy-MM-dd
+    public int cantidad_aportes;          // Número de aportes registrados para la meta
+    public String estado;                 // Estado de la meta (ej. activa, completada, etc.)
 
+    // Constructor vacío para frameworks y serialización
     public MetaDetalleDTO() {}
 
+    // Constructor para crear objeto con todos los detalles excepto estado
     public MetaDetalleDTO(int id, String nombre, String descripcion, BigDecimal monto, BigDecimal total, String fecha_creacion, String fecha_limite, int cantidad_aportes) {
         this.id = id;
         this.nombre = nombre;
@@ -30,6 +32,8 @@ public class MetaDetalleDTO {
         this.fecha_limite = fecha_limite;
         this.cantidad_aportes = cantidad_aportes;
     }
+
+    // Getters y setters para acceder y modificar cada campo
 
     public BigDecimal getTotal() {
         return total;
@@ -75,7 +79,8 @@ public class MetaDetalleDTO {
         return fecha_creacion;
     }
 
-    public void setFecha_reacion(String fecha_creacion) {
+    // Nota: en el setter hay un typo en el nombre: setFecha_reacion debería ser setFecha_creacion
+    public void setFecha_creacion(String fecha_creacion) {
         this.fecha_creacion = fecha_creacion;
     }
 
@@ -102,6 +107,4 @@ public class MetaDetalleDTO {
     public void setEstado(String estado) {
         this.estado = estado;
     }
-  
-    
 }

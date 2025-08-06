@@ -1,547 +1,586 @@
-package CONTROLLER; // Paquete que contiene el controlador de usuarios
+package CONTROLLER; // Paquete que agrupa los controladores del sistema
 
-import MODELO.UsuarioDao;
-import MODELO.CantidadRegistrosDTO;
-import MODELO.PasswordDTO;
-import MODELO.Usuario; // Importa la clase Usuario que representa la entidad de usuario
-import MODELO.UsuarioDTO;
-import MODELO.UsuarioLoginDTO;
-import MODELO.UsuarioTablaDTO;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import javax.ws.rs.Consumes; // Importa la anotación para indicar el tipo de contenido que consume el método
-import javax.ws.rs.DELETE; // Importa la anotación para manejar solicitudes DELETE
-import javax.ws.rs.GET; // Importa la anotación para manejar solicitudes GET
-import javax.ws.rs.PATCH;
-import javax.ws.rs.POST; // Importa la anotación para manejar solicitudes POST
-import javax.ws.rs.PUT; // Importa la anotación para manejar solicitudes PUT
-import javax.ws.rs.Path; // Importa la anotación para definir la ruta del recurso
-import javax.ws.rs.PathParam; // Importa la anotación para extraer parámetros de la ruta
-import javax.ws.rs.Produces; // Importa la anotación para indicar el tipo de contenido que produce el método
-import javax.ws.rs.core.MediaType; // Importa la clase MediaType para definir tipos de contenido
-import javax.ws.rs.core.Response; // Importa la clase Response para construir respuestas HTTP
-import org.json.JSONException;
-import org.mindrot.jbcrypt.BCrypt;
+import MODELO.UsuarioDao;              // Capa DAO para interacción con BD para usuarios
+import MODELO.CantidadRegistrosDTO;    // DTO para manejar cantidad de registros
+import MODELO.PasswordDTO;             // DTO para manejo de contraseña (si aplica)
+import MODELO.Usuario;                 // Entidad Usuario que representa datos de usuario
+import MODELO.UsuarioDTO;              // DTO para transferencia de datos de usuario
+import MODELO.UsuarioLoginDTO;         // DTO para login de usuario
+import MODELO.UsuarioTablaDTO;         // DTO para datos de usuario en formato tabla
+import java.sql.ResultSet;             // Para manejo de resultados de consultas SQL
+import java.sql.SQLException;          // Manejo de excepciones SQL
+import java.util.ArrayList;            // Implementación de lista dinámica
+import java.util.List;                 // Interfaz lista para colecciones
+import javax.ws.rs.Consumes;           // Anotación para tipos de contenido entrante
+import javax.ws.rs.DELETE;             // Anotación para método HTTP DELETE
+import javax.ws.rs.GET;                // Anotación para método HTTP GET
+import javax.ws.rs.PATCH;              // Anotación para método HTTP PATCH
+import javax.ws.rs.POST;               // Anotación para método HTTP POST
+import javax.ws.rs.PUT;                // Anotación para método HTTP PUT
+import javax.ws.rs.Path;               // Anotación para definir ruta HTTP
+import javax.ws.rs.PathParam;          // Anotación para extraer parámetros de ruta
+import javax.ws.rs.Produces;           // Anotación para tipo de contenido saliente
+import javax.ws.rs.core.MediaType;     // Constantes para tipos de contenido (ej: JSON)
+import javax.ws.rs.core.Response;      // Construcción de respuestas HTTP
+import org.json.JSONException;         // Excepción para manejo de JSON
+import org.mindrot.jbcrypt.BCrypt;    // Librería para encriptación de contraseñas
 
-@Path("/usuarios") // Define la ruta base para todas las operaciones relacionadas con usuarios
+@Path("/usuarios") // Ruta base para todas las operaciones REST relacionadas con usuarios
 public class UserController {
-    
 
-    @GET // Indica que este método responde a solicitudes GET
-    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
+    /**
+     * Método para obtener todos los usuarios registrados en la base de datos.
+     * @return Response HTTP con la lista de usuarios o mensaje en caso de no haber usuarios.
+     * El método responde a peticiones HTTP GET a la ruta /usuarios
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON) // Indica que la respuesta será en formato JSON
     public static Response getUsuarios() {
-        
-        List<Usuario> usuarios = new ArrayList<>(); // Crea una lista para almacenar los usuarios recuperados
-        
+        List<Usuario> usuarios = new ArrayList<>(); // Lista para almacenar objetos Usuario
+
         try {
-            // Ejecuta la consulta para obtener todos los usuarios mediante la capa DAO
+            // Llama a la capa DAO para obtener el conjunto de usuarios de la base de datos
             ResultSet respuesta = UsuarioDao.getUsuarios();
-            while (respuesta.next()) { // Cambia esto a un while
-                // Crea un objeto Usuario con los datos de cada fila
+
+            // Itera el ResultSet para construir objetos Usuario con los datos obtenidos
+            while (respuesta.next()) {
                 Usuario usuario = new Usuario(
-                    respuesta.getInt("id"),
-                    respuesta.getString("nombre"),
-                    respuesta.getString("apellido"),
-                    respuesta.getString("correo"),
-                    respuesta.getString("contrasena"),
-                    Integer.parseInt(respuesta.getString("genero_id")),
-                    Integer.parseInt(respuesta.getString("ciudad_id")),
-                    respuesta.getInt("rol_id"), // Obtiene el ID del rol del usuario
-                    Integer.parseInt(respuesta.getString("estado_id"))
+                    respuesta.getInt("id"),                      // ID único del usuario
+                    respuesta.getString("nombre"),               // Nombre del usuario
+                    respuesta.getString("apellido"),             // Apellido del usuario
+                    respuesta.getString("correo"),               // Correo electrónico
+                    respuesta.getString("contrasena"),           // Contraseña encriptada (ideal no enviar)
+                    Integer.parseInt(respuesta.getString("genero_id")),   // ID del género
+                    Integer.parseInt(respuesta.getString("ciudad_id")),   // ID de la ciudad
+                    respuesta.getInt("rol_id"),                   // ID del rol asignado
+                    Integer.parseInt(respuesta.getString("estado_id"))    // ID del estado del usuario (activo/inactivo)
                 );
-                // Añade el objeto Usuario a la lista de usuarios
+
+                // Agrega cada objeto Usuario a la lista
                 usuarios.add(usuario);
             }
-            // Cierra el ResultSet para liberar recursos
+
+            // Cierra el ResultSet para liberar recursos y evitar fugas
             respuesta.close();
-            // Devuelve la lista de usuarios con estado 200 OK si hay usuarios
+
+            // Si la lista tiene usuarios, retorna con código 200 OK y lista; si está vacía retorna mensaje con 200
             if (!usuarios.isEmpty()) {
                 return ResponseProvider.success(usuarios, "Usuarios obtenidos con éxito.", 200);
             } else {
                 return ResponseProvider.success(usuarios, "No hay usuarios registrados.", 200);
             }
-            
+
         } catch (SQLException e) {
-            // Si ocurre un error en la consulta, devuelve un estado 500
+            // Si ocurre una excepción SQL, retorna un error 500 indicando problema interno
             return ResponseProvider.error("Error interno al obtener los usuarios", 500);
         }
     }
 
-    @GET // Indica que este método responde a solicitudes GET
+    /**
+     * Método para obtener usuarios en formato tabla con campos detallados para UI.
+     * Útil para mostrar listados en front-end con información desglosada.
+     * Responde a GET /usuarios/tabla
+     */
+    @GET
     @Path("/tabla")
-    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
+    @Produces(MediaType.APPLICATION_JSON)
     public static Response getUsuariosTabla() {
-        
-        List<UsuarioTablaDTO> usuarios = new ArrayList<>(); // Crea una lista para almacenar los usuarios recuperados
-        
+        List<UsuarioTablaDTO> usuarios = new ArrayList<>();
+
         try {
-            // Ejecuta la consulta para obtener todos los usuarios mediante la capa DAO
+            // Ejecuta la consulta para obtener los usuarios con datos relacionados (rol, ciudad, estado, etc)
             ResultSet respuesta = UsuarioDao.getUsuariosTabla();
-            while (respuesta.next()) { // Cambia esto a un while
-                // Crea un objeto Usuario con los datos de cada fila
+
+            // Itera los resultados para crear objetos UsuarioTablaDTO con datos formateados
+            while (respuesta.next()) {
                 UsuarioTablaDTO usuario = new UsuarioTablaDTO(
-                    respuesta.getInt("id"),
-                    respuesta.getString("rol"),
-                    respuesta.getString("nombre"),
-                    respuesta.getString("apellido"),
-                    respuesta.getString("correo"),
-                    respuesta.getString("genero"),
-                    respuesta.getString("ciudad"),
-                    respuesta.getString("estado")
+                    respuesta.getInt("id"),           // ID del usuario
+                    respuesta.getString("rol"),       // Nombre del rol (ej. Admin, Usuario)
+                    respuesta.getString("nombre"),    // Nombre
+                    respuesta.getString("apellido"),  // Apellido
+                    respuesta.getString("correo"),    // Correo
+                    respuesta.getString("genero"),    // Género descriptivo (ej. Masculino)
+                    respuesta.getString("ciudad"),    // Ciudad descriptiva
+                    respuesta.getString("estado")     // Estado descriptivo (ej. Activo)
                 );
-                // Añade el objeto Usuario a la lista de usuarios
+
                 usuarios.add(usuario);
             }
-            // Cierra el ResultSet para liberar recursos
+
             respuesta.close();
-            // Devuelve la lista de usuarios con estado 200 OK si hay usuarios
+
             if (!usuarios.isEmpty()) {
                 return ResponseProvider.success(usuarios, "Usuarios obtenidos con éxito.", 200);
             } else {
                 return ResponseProvider.success(usuarios, "No hay usuarios registrados.", 200);
             }
-            
         } catch (SQLException e) {
-            // Si ocurre un error en la consulta, devuelve un estado 500
             return ResponseProvider.error("Error interno al obtener los usuarios", 500);
         }
     }
-    
-    @GET // Indica que este método responde a solicitudes GET
-    @Path("/cantidad")
-    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
-    public static Response getUsuario() {
-        
-        CantidadRegistrosDTO cantidad = null;
-        
-        try {
 
+    /**
+     * Método para obtener la cantidad total de usuarios registrados en la base de datos.
+     * Responde a GET /usuarios/cantidad
+     */
+    @GET
+    @Path("/cantidad")
+    @Produces(MediaType.APPLICATION_JSON)
+    public static Response getUsuario() {
+        CantidadRegistrosDTO cantidad = null;
+
+        try {
             ResultSet respuesta = UsuarioDao.getCantidadUsuarios();
-            while (respuesta.next()) { // Cambia esto a un while
-                
-                cantidad = new CantidadRegistrosDTO(
-                    respuesta.getInt("cantidad")
-                );
+
+            // Obtiene el número de usuarios desde la consulta
+            while (respuesta.next()) {
+                cantidad = new CantidadRegistrosDTO(respuesta.getInt("cantidad"));
             }
-            // Cierra el ResultSet para liberar recursos
+
             respuesta.close();
-            // Devuelve el usuario con estado 200 OK si existe
+
+            // Retorna error 404 si no pudo obtener cantidad, o éxito con el dato
             if (cantidad == null) {
                 return ResponseProvider.error("No se pudo obtener la cantidad de usuarios.", 404);
             } else {
                 return ResponseProvider.success(cantidad, "Cantidad de usuarios obtenida con éxito.", 200);
             }
-            
+
         } catch (SQLException e) {
-            // Si ocurre un error en la consulta, devuelve un estado 500
             return ResponseProvider.error("Error interno al obtener la cantidad de usuarios", 500);
         }
     }
 
-    @GET // Indica que este método responde a solicitudes GET
-    @Path("/{id}") // La ruta incluye el ID del usuario a buscar
-    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
+    /**
+     * Método para obtener un usuario específico a partir de su ID.
+     * Responde a GET /usuarios/{id}
+     * @param id Identificador único del usuario a buscar
+     * @return Usuario encontrado o error si no existe
+     */
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
     public static Response getUsuarioById(@PathParam("id") int id) {
-        
-        Usuario usuario = null; // Variable para almacenar el usuario encontrado
-        
+        Usuario usuario = null;
+
         try {
-            // Realiza la consulta para recuperar el usuario por su ID a través de la capa DAO
             ResultSet respuesta = UsuarioDao.getUsuarioById(id);
-            
-            // Si la consulta devuelve datos, crea el objeto Usuario
-            while (respuesta.next()) { 
+
+            // Construye el objeto usuario si la consulta devuelve datos
+            while (respuesta.next()) {
                 usuario = new Usuario(
-                    respuesta.getInt("id"), // Obtiene el ID del usuario
-                    respuesta.getString("nombre"), // Obtiene el nombre del usuario
-                    respuesta.getString("apellido"), // Obtiene el apellido del usuario
-                    respuesta.getString("correo"), // Obtiene el correo electrónico del usuario
-                    "", // Obtiene la contraseña del usuario
-                    respuesta.getInt("genero_id"), // Obtiene el ID del género del usuario
-                    respuesta.getInt("ciudad_id"), // Obtiene el ID de la ciudad del usuario
-                    respuesta.getInt("rol_id"), // Obtiene el ID del rol del usuario
-                    respuesta.getInt("estado_id") // Obtiene el ID del estado del usuario
+                    respuesta.getInt("id"),
+                    respuesta.getString("nombre"),
+                    respuesta.getString("apellido"),
+                    respuesta.getString("correo"),
+                    "", // Por seguridad no se retorna contraseña
+                    respuesta.getInt("genero_id"),
+                    respuesta.getInt("ciudad_id"),
+                    respuesta.getInt("rol_id"),
+                    respuesta.getInt("estado_id")
                 );
             }
-            // Cierra el ResultSet para liberar recursos
+
             respuesta.close();
-            
-            // Devuelve el usuario con estado 200 OK si existe
+
+            // Retorna error 404 si no existe, o el usuario con código 200
             if (usuario == null) {
                 return ResponseProvider.error("El usuario no existe.", 404);
             } else {
                 return ResponseProvider.success(usuario, "Usuario obtenido con éxito.", 200);
             }
-            
+
         } catch (SQLException e) {
-            // Si ocurre un error en la consulta, devuelve un estado 500
             return ResponseProvider.error("Error interno al obtener los usuarios", 500);
         }
     }
-    
 
+    /**
+     * Método para crear un nuevo usuario.
+     * Recibe un JSON con los datos del usuario y devuelve la creación o error.
+     * Responde a POST /usuarios/register
+     */
     @POST
     @Path("/register")
-    @Validar(entidad = "Usuario")
-    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
-    @Consumes(MediaType.APPLICATION_JSON) // Indica que el método acepta datos en formato JSON
+    @Validar(entidad = "Usuario") // Valida los datos según reglas predefinidas
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     public static Response createUsuario(Usuario usuarioData) {
-        
         try {
-            
+            // Verifica si el correo ya está registrado
             Usuario usuarioExistente = getUsuarioByCorreo(usuarioData.getCorreo());
+
+            if (usuarioExistente != null)
+                return ResponseProvider.error("Este correo ya fue registrado.", 409); // Conflicto
+
             
-            if (usuarioExistente != null) return ResponseProvider.error("Este correo ya fué registrado.", 409);
+            Response ciudad = CiudadController.getCiudad(usuarioData.getCiudad_id());
             
-            //Se obtiene la contraseña del usuario
+            if(ciudad.getStatus() !=  200) return ResponseProvider.error("Esta ciudad no existe.", 409); // Conflicto
+            
+            Response genero = GeneroController.getGenero(usuarioData.getGenero_id());
+            
+            if(ciudad.getStatus() !=  200) return ResponseProvider.error("Este genero no existe.", 409); // Conflicto
+            
+            // Obtiene la contraseña en texto plano para hashear
             String contrasenaText = usuarioData.getContrasena();
-            // se hashea la contraseña
+
+            // Hashea la contraseña antes de almacenar
             usuarioData.setContrasena(hashPassword(contrasenaText));
-            
-            int idGenerado = 0; // Inicializa variable para almacenar el ID generado
-            
-            // Inserta el nuevo usuario en la base de datos y obtiene el último ID generado
+
+            int idGenerado = 0; // Variable para almacenar el ID generado por BD
+
+            // Inserta el usuario en la base de datos
             ResultSet ultimoRegistro = UsuarioDao.createUsuario(usuarioData);
-            
-            // Si la inserción fue exitosa, asigna el ID generado al objeto usuario
+
+            // Obtiene el ID generado tras inserción
             while (ultimoRegistro.next()) {
                 idGenerado = ultimoRegistro.getInt(1);
-                usuarioData.setId(idGenerado); // Asigna el ID al objeto usuario
-                usuarioData.setContrasena(contrasenaText);
+                usuarioData.setId(idGenerado);
+                usuarioData.setContrasena(contrasenaText); // Opcional: conservar contraseña en memoria
             }
-            
-            // Cierra el conjunto de resultados para optimizar recursos
+
             ultimoRegistro.close();
-            
-            // Devuelve el usuario con estado 200 OK si se crea con exito
+
+            // Si no se creó correctamente, devuelve error
             if (idGenerado == 0) {
                 return ResponseProvider.error("Error al crear el usuario.", 400);
             } else {
                 return ResponseProvider.success(usuarioData, "Usuario creado con éxito.", 200);
             }
-            
+
         } catch (SQLException e) {
-            // Si ocurre un error en la consulta, devuelve un estado 500
             return ResponseProvider.error("Error interno al crear el usuario.", 500);
         }
     }
     
     @POST
-    @Path("/login")
-    @Validar(entidad = "UsuarioLogin")
-    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
-    @Consumes(MediaType.APPLICATION_JSON) // Indica que el método acepta datos en formato JSON
+    @Path("/login") // Define la ruta para el login de usuarios: POST /usuarios/login
+    @Validar(entidad = "UsuarioLogin") // Valida que el DTO cumpla con las reglas de UsuarioLogin
+    @Produces(MediaType.APPLICATION_JSON) // La respuesta será en JSON
+    @Consumes(MediaType.APPLICATION_JSON) // Se reciben datos JSON
     public static Response loginUser(UsuarioLoginDTO usuarioData) {
-        
+
         try {
+            // Busca el usuario en la BD por correo
             Usuario usuario = getUsuarioByCorreo(usuarioData.getCorreo());
-        
+
+            // Si no existe el correo registrado, retorna error 404
             if(usuario == null) return ResponseProvider.error("Este correo no se encuentra registrado.", 404, null);
-            
+
+            // Si el usuario está inactivo (estado 2), deniega acceso con 404 (podría ser 403)
             if(usuario.getEstado_id() == 2) return ResponseProvider.error("Este usuario no se encuentra registrado.", 404, null);
 
+            // Verifica que la contraseña proporcionada coincida con la almacenada (hasheada)
             if(!checkPassword(
-                    usuarioData.getContrasena(), 
+                    usuarioData.getContrasena(),
                     usuario.getContrasena()
             ))
+                // Si la contraseña no coincide, error 404 (mejor un 401 o 403 pero mantienes 404)
                 return ResponseProvider.error("Contraseña incorrecta.", 404, null);
 
             else {
-                
+                // Si todo es correcto, crea un DTO con datos seguros para responder
                 UsuarioDTO usuarioDto = new UsuarioDTO(
                         usuario.getId(),
                         usuario.getNombre(),
                         usuario.getApellido(),
                         usuario.getRol_id()
                 );
-                
+
+                // Retorna éxito con los datos mínimos necesarios y código 200 OK
                 return ResponseProvider.success(usuarioDto, "Inicio de sesión exitoso.", 200);
             }
-            
+
         } catch (JSONException e) {
+            // Si ocurre error en el procesamiento JSON, retorna error 500
             return ResponseProvider.error("Error interno al validar el usuario.", 500);
         }
     }
 
-    @PUT // Indica que este método responde a solicitudes PUT
-    @Validar(entidad = "Usuario")
+    @PUT // Método para actualizar un usuario completo
+    @Validar(entidad = "Usuario") // Valida el DTO Usuario
     @Path("/{id}") // Ruta con el ID del usuario a actualizar
-    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
-    @Consumes(MediaType.APPLICATION_JSON) // Indica que el método acepta datos en formato JSON
+    @Produces(MediaType.APPLICATION_JSON) // Respuesta en JSON
+    @Consumes(MediaType.APPLICATION_JSON) // Recibe datos JSON
     public static Response updateUsuario(@PathParam("id") int id, Usuario usuarioData) {
-        boolean hashValido = true;
-        
-        try {
-           
-           Response usuarioExistente = getUsuarioById(id);
-            
-           if (usuarioExistente.getStatus() == 404) return ResponseProvider.error("Este usuario no existe.", 404);
-           
+        boolean hashValido = true; // Bandera para controlar si la actualización de contraseña fue exitosa
 
-           if(existEmail(id, usuarioData)) return ResponseProvider.error("Este correo ya fué registrado.", 409);
-           
-           if(usuarioData.getContrasena() != null) {
-                //Se obtiene la contraseña del usuario
+        try {
+            // Verifica si el usuario existe (usa método que devuelve Response para verificar status)
+            Response usuarioExistente = getUsuarioById(id);
+
+            if (usuarioExistente.getStatus() == 404) 
+                return ResponseProvider.error("Este usuario no existe.", 404);
+
+            // Valida que el correo no esté duplicado en otro usuario distinto al actual
+            if(existEmail(id, usuarioData)) 
+                return ResponseProvider.error("Este correo ya fué registrado.", 409);
+            
+            Response ciudad = CiudadController.getCiudad(usuarioData.getCiudad_id());
+            
+            if(ciudad.getStatus() !=  200) return ResponseProvider.error("Esta ciudad no existe.", 409); // Conflicto
+            
+            Response genero = GeneroController.getGenero(usuarioData.getGenero_id());
+            
+            if(ciudad.getStatus() !=  200) return ResponseProvider.error("Este genero no existe.", 409); // Conflicto
+
+            // Si la contraseña está incluida en la actualización, la procesa aparte
+            if(usuarioData.getContrasena() != null) {
+                // Obtiene la contraseña en texto plano
                 String contrasenaText = usuarioData.getContrasena();
-                // se hashea la contraseña
+
+                // Hashea la contraseña
                 String hashContrasena =  hashPassword(contrasenaText);
-                
+
+                // Actualiza la contraseña en la BD
                 int rowsAffectedPswd = UsuarioDao.updateContrasena(id, hashContrasena);
-                
+
+                // Si no se actualizó la contraseña correctamente, marca error
                 if(rowsAffectedPswd == 0) hashValido = false;
-           }
-           
-            // Intenta actualizar el usuario en la base de datos y devuelve el número de filas afectadas
+            }
+
+            // Actualiza los demás campos del usuario en la BD
             int rowsAffectedUsuario = UsuarioDao.updateUsuario(id, usuarioData);
-            
-            
+
+            // Si actualizó datos y contraseña correctamente, devuelve éxito
             if (rowsAffectedUsuario != 0 && hashValido){
-                // Si la actualización se realizó, se confirma el éxito con código 200 OK
                 return ResponseProvider.success(null, "Usuario actualizado con éxito.", 200);
             }
             else 
                 return ResponseProvider.error("Error al actualizar el usuario.", 400);
-            
+
         } catch (Exception e) {
-            // Captura cualquier problema interno y devuelve un error 500 con mensaje
+            // Captura errores inesperados y retorna error interno 500
             return ResponseProvider.error("Error interno al actualizar el usuario.", 500);
         }
     }
-    
-    @PATCH // Indica que este método responde a solicitudes PATCH
-    @Validar(entidad = "UsuarioPerfil")
-    @Path("/{id}") // Ruta con el ID del usuario a actualizar
-    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
-    @Consumes(MediaType.APPLICATION_JSON) // Indica que el método acepta datos en formato JSON
+
+    @PATCH // Método para actualización parcial (perfil)
+    @Validar(entidad = "UsuarioPerfil") // Valida DTO UsuarioPerfil (menos campos)
+    @Path("/{id}") // Ruta con el ID del usuario a actualizar parcialmente
+    @Produces(MediaType.APPLICATION_JSON) // Respuesta JSON
+    @Consumes(MediaType.APPLICATION_JSON) // Datos entrantes JSON
     public static Response partialUpdateUsuario(@PathParam("id") int id, Usuario usuarioData) {
         try {
+            // Verifica que el correo no esté duplicado para otro usuario distinto
             if(existEmail(id, usuarioData)) return ResponseProvider.error("Este correo ya fué registrado.", 409);
             
+            Response ciudad = CiudadController.getCiudad(usuarioData.getCiudad_id());
+            
+            if(ciudad.getStatus() !=  200) return ResponseProvider.error("Esta ciudad no existe.", 409); // Conflicto
+            
+            Response genero = GeneroController.getGenero(usuarioData.getGenero_id());
+            
+            if(ciudad.getStatus() !=  200) return ResponseProvider.error("Este genero no existe.", 409); // Conflicto
+
+            // Crea un objeto Usuario con solo los campos permitidos para actualización parcial
             Usuario usuarioParcial = new Usuario(
                 id,
-                usuarioData.getNombre(), // Obtiene el nombre del usuario
-                usuarioData.getApellido(), // Obtiene el apellido del usuario
-                usuarioData.getCorreo(), // Obtiene el correo electrónico del usuario
-                usuarioData.getGenero_id(), // Obtiene el ID del género del usuario
-                usuarioData.getCiudad_id() // Obtiene el ID de la ciudad del usuario
+                usuarioData.getNombre(),
+                usuarioData.getApellido(),
+                usuarioData.getCorreo(),
+                usuarioData.getGenero_id(),
+                usuarioData.getCiudad_id()
             );
-            
-            // Intenta actualizar el usuario en la base de datos y devuelve el número de filas afectadas
+
+            // Actualiza solo los campos indicados en la BD
             int rowsAffected = UsuarioDao.partialUpdate(id, usuarioParcial);
-            
+
             if (rowsAffected != 0){
-                
                 usuarioData.setId(id);
-                // Si la actualización se realizó, se confirma el éxito con código 200 OK
                 return ResponseProvider.success(null, "Usuario actualizado con éxito.", 200);
             }
             else 
                 return ResponseProvider.error("Error al actualizar el usuario.", 400);
-            
+
         } catch (Exception e) {
-            // Captura cualquier problema interno y devuelve un error 500 con mensaje
             return ResponseProvider.error("Error interno al actualizar el usuario.", 500);
         }
     }
-    
-    
-    @PATCH // Indica que este método responde a solicitudes PUT
-    @Path("/password/usuario/{usuario_id}") // Ruta con el ID del usuario a actualizar
-    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
-    @Consumes(MediaType.APPLICATION_JSON) // Indica que el método acepta datos en formato JSON
+
+    @PATCH // Método para actualizar contraseña específica
+    @Path("/password/usuario/{usuario_id}") // Ruta para actualizar contraseña del usuario
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     public static Response updateContrasena(@PathParam("usuario_id") int usuario_id, PasswordDTO passwordData) {
         try {
-            
+            // Verifica que las contraseñas nuevas coincidan
             if(!passwordData.getNew_password().equals(passwordData.getConfirm_password()))
                 return ResponseProvider.error("Las contraseñas no coinciden.", 400, null);
-            
-            //Se obtiene la contraseña del usuario
+
+            // Valida que la contraseña antigua sea correcta
             boolean passwordValid = validatePassword(usuario_id, passwordData.getOld_password());
-            
+
             if(!passwordValid) return ResponseProvider.error("Contraseña incorrecta.", 400, null);
-            
-            // se hashea la contraseña
+
+            // Hashea la nueva contraseña
             String hashPassword = hashPassword(passwordData.getNew_password());
-            
-            // Ejecuta la actualización de la contraseña en la base de datos y recibe la cantidad de filas afectadas
+
+            // Actualiza la contraseña en BD y obtiene filas afectadas
             int rowsAffected = UsuarioDao.updateContrasena(usuario_id, hashPassword);
-            
+
             if (rowsAffected != 0) 
-                // Si contraseña actualizaa correctamente, devuelve código 204 No Content con mensaje
                 return ResponseProvider.success(null, "Contraseña actualizada con éxito.", 200);
             else 
-                // Si no encontró usuario para actualizar contraseña, devuelve 404 Not Found con mensaje
                 return ResponseProvider.error("Este usuario no existe.", 404, null);
-            
+
         } catch(Exception e) {
             return ResponseProvider.error("Error interno al actualizar la contraseña.", 500);
         }
     }
-    
-    @DELETE // Indica que este método responde a solicitudes DELETE
-    @Path("soft/{id}") // Ruta con el ID del usuario a eliminar
-    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
+
+    @DELETE // Método para eliminación lógica de usuario (soft delete)
+    @Path("soft/{id}") // Ruta para soft delete del usuario por ID
+    @Produces(MediaType.APPLICATION_JSON)
     public static Response softDeleteUsuario(@PathParam("id") int id) {
-     
         try {
-            
-            // Ejecuta la eliminación de usuario en la base de datos y recibe la cantidad de filas afectadas
+            // Ejecuta soft delete y obtiene filas afectadas
             int rowsAffected = UsuarioDao.softDeleteUsuario(id);
-            
+
             if (rowsAffected != 0) 
-                // Si usuario eliminado correctamente, devuelve código 204 No Content con mensaje
                 return ResponseProvider.success(null, "Usuario eliminado de forma segura.", 200);
             else 
-                // Si no encontró usuario para eliminar, devuelve 404 Not Found con mensaje
                 return ResponseProvider.error("Este usuario no existe.", 404);
-            
+
         } catch (Exception e) {
-            // Para cualquier error interno, retorna un error 500 con mensaje
             return ResponseProvider.error("Error interno al eliminar el usuario.", 500);
         }
     }
-    
-    @DELETE // Indica que este método responde a solicitudes DELETE
-    @Path("/{id}") // Ruta con el ID del usuario a eliminar
-    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
+
+    @DELETE // Método para eliminación física definitiva de usuario
+    @Path("/{id}") // Ruta para delete definitivo por ID
+    @Produces(MediaType.APPLICATION_JSON)
     public static Response deleteUsuario(@PathParam("id") int id) {
-     
         try {
-            
-            // Ejecuta la eliminación de usuario en la base de datos y recibe la cantidad de filas afectadas
+            // Ejecuta eliminación física y obtiene filas afectadas
             int rowsAffected = UsuarioDao.deleteUsuario(id);
-            
+
             if (rowsAffected != 0) 
-                // Si usuario eliminado correctamente, devuelve código 204 No Content con mensaje
                 return ResponseProvider.success(null, "Usuario eliminado con éxito.", 200);
             else 
-                // Si no encontró usuario para eliminar, devuelve 404 Not Found con mensaje
                 return ResponseProvider.error("Este usuario no existe.", 404);
-            
+
         } catch (Exception e) {
-            // Para cualquier error interno, retorna un error 500 con mensaje
             return ResponseProvider.error("Error interno al eliminar el usuario.", 500);
         }
     }
-    
+
     private static Usuario getUsuarioByCorreo(String correo) {
-        Usuario usuario = null; // Variable para almacenar el usuario buscado
-        
+        Usuario usuario = null; // Inicializa usuario resultado
+
         try {
-            // Consulta a la base de datos para encontrar usuario con el correo indicado
+            // Consulta usuario por correo
             ResultSet respuesta = UsuarioDao.getUsuarioByCorreo(correo);
-            
-            // Si existe, crea un objeto Usuario con la información recibida
+
+            // Si existe, construye objeto Usuario
             while (respuesta.next()) { 
                 usuario = new Usuario(
-                    respuesta.getInt("id"), // Obtiene el ID del usuario
-                    respuesta.getString("nombre"), // Obtiene el nombre del usuario
-                    respuesta.getString("apellido"), // Obtiene el apellido del usuario
-                    respuesta.getString("correo"), // Obtiene el correo electrónico del usuario
-                    respuesta.getString("contrasena"), // Obtiene la contraseña del usuario
-                    respuesta.getInt("genero_id"), // Obtiene el ID del género del usuario
-                    respuesta.getInt("ciudad_id"), // Obtiene el ID de la ciudad del usuario
-                    respuesta.getInt("rol_id"), // Obtiene el ID del rol del usuario
-                    respuesta.getInt("estado_id") // Obtiene el ID del estado del usuario
+                    respuesta.getInt("id"),
+                    respuesta.getString("nombre"),
+                    respuesta.getString("apellido"),
+                    respuesta.getString("correo"),
+                    respuesta.getString("contrasena"),
+                    respuesta.getInt("genero_id"),
+                    respuesta.getInt("ciudad_id"),
+                    respuesta.getInt("rol_id"),
+                    respuesta.getInt("estado_id")
                 );
             }
-            
-            // Cierra el conjunto de resultados para optimizar recursos
+
             respuesta.close();
-            
-            // Devuelve el usuario con estado 200 OK si existe
             return usuario;
-            
+
         } catch (SQLException e) {
-            // Si ocurre un error en la consulta, devuelve un estado 500
+            // Error crítico, se lanza error para manejo arriba
             throw new Error("Error al obtener el usuario");
         }
     }
-    
-    private static boolean existEmail(int id, Usuario usuarioData) {
 
+    private static boolean existEmail(int id, Usuario usuarioData) {
         boolean existe = false;
 
         try {
-            // Ejecuta la consulta para obtener todos los usuarios mediante la capa DAO
+            // Consulta todos los usuarios
             ResultSet respuesta = UsuarioDao.getUsuarios();
+
+            // Recorre para verificar si otro usuario tiene el mismo correo
             while (respuesta.next()) {
-
-                if(respuesta.getInt("id") != id && usuarioData.getCorreo().equals(respuesta.getString("correo"))) existe = true;
-
+                // Si otro usuario (distinto ID) tiene el mismo correo, marca true
+                if(respuesta.getInt("id") != id && usuarioData.getCorreo().equals(respuesta.getString("correo"))) 
+                    existe = true;
             }
-            // Cierra el ResultSet para liberar recursos
-            respuesta.close();
 
+            respuesta.close();
             return existe;
 
         } catch (SQLException e) {
             throw new Error("Error al validar si el correo existe");
         }
     }
-    
+
     public static boolean validatePassword(int usuario_id, String passwordText) {
         try {
-            
+            // Obtiene contraseña hash actual del usuario
             String contrasenaHash = obtenerContrasena(usuario_id);
-            
+
             if(contrasenaHash == null) return false;
-            
+
+            // Verifica que la contraseña dada coincida con la almacenada
             return !checkPassword(
                     passwordText, 
                     contrasenaHash
             );
-            
+
         } catch (Exception e) {
             System.out.println(e);
             return false;
         }
     }
-    
+
     private static String obtenerContrasena(int id) {
-        Usuario usuario = null; // Variable para almacenar el usuario encontrado
-        
+        Usuario usuario = null;
+
         try {
-            // Realiza la consulta para recuperar el usuario por su ID a través de la capa DAO
+            // Consulta usuario por ID para obtener contraseña
             ResultSet respuesta = UsuarioDao.getUsuarioById(id);
-            
-            // Si la consulta devuelve datos, crea el objeto Usuario
+
             while (respuesta.next()) { 
                 usuario = new Usuario(
-                    respuesta.getInt("id"), // Obtiene el ID del usuario
-                    respuesta.getString("nombre"), // Obtiene el nombre del usuario
-                    respuesta.getString("apellido"), // Obtiene el apellido del usuario
-                    respuesta.getString("correo"), // Obtiene el correo electrónico del usuario
-                    respuesta.getString("contrasena"), // Obtiene la contraseña del usuario
-                    respuesta.getInt("genero_id"), // Obtiene el ID del género del usuario
-                    respuesta.getInt("ciudad_id"), // Obtiene el ID de la ciudad del usuario
-                    respuesta.getInt("rol_id"), // Obtiene el ID del rol del usuario
-                    respuesta.getInt("estado_id") // Obtiene el ID del estado del usuario
+                    respuesta.getInt("id"),
+                    respuesta.getString("nombre"),
+                    respuesta.getString("apellido"),
+                    respuesta.getString("correo"),
+                    respuesta.getString("contrasena"),
+                    respuesta.getInt("genero_id"),
+                    respuesta.getInt("ciudad_id"),
+                    respuesta.getInt("rol_id"),
+                    respuesta.getInt("estado_id")
                 );
             }
-            // Cierra el ResultSet para liberar recursos
+
             respuesta.close();
-            
-            // Devuelve el usuario con estado 200 OK si existe
+
+            // Si usuario no existe, retorna null; si existe, retorna la contraseña hash
             if (usuario == null) {
                 return null;
             } else {
                 return usuario.getContrasena();
             }
-            
+
         } catch (SQLException e) {
             return null;
         }
     }
-    
+
     public static String hashPassword(String contrasenaText) {
-        
+        // Genera hash bcrypt para la contraseña en texto plano
         return BCrypt.hashpw(contrasenaText, BCrypt.gensalt());
     }
 
     public static boolean checkPassword(String contrasenaText, String hashedContrasena) {
+        // Verifica que el texto plano coincida con el hash almacenado
         return BCrypt.checkpw(contrasenaText, hashedContrasena);
     }
+
 }

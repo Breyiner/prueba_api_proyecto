@@ -16,7 +16,7 @@ public class GeneroController {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getGeneros() {
+    public static Response getGeneros() {
         List<Genero> generos = new ArrayList<>();
         try {
             ResultSet respuesta = GeneroDao.getGeneros();
@@ -41,7 +41,7 @@ public class GeneroController {
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getGenero(@PathParam("id") int id) {
+    public static Response getGenero(@PathParam("id") int id) {
         Genero genero = null;
         try {
             ResultSet respuesta = GeneroDao.getGeneroById(id);
@@ -66,7 +66,7 @@ public class GeneroController {
     @Validar(entidad = "Generos")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createGenero(Genero generoData) {
+    public static Response createGenero(Genero generoData) {
         try {
             int idGenerado = 0;
             ResultSet ultimoRegistro = GeneroDao.createGenero(generoData);
@@ -89,7 +89,7 @@ public class GeneroController {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateGenero(@PathParam("id") int id, Genero generoData) {
+    public static Response updateGenero(@PathParam("id") int id, Genero generoData) {
         try {
             Response generoExistente = getGenero(id);
             if (generoExistente.getStatus() == 404) return ResponseProvider.error("Este género no existe.", 404);
@@ -109,7 +109,7 @@ public class GeneroController {
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteGenero(@PathParam("id") int id) {
+    public static Response deleteGenero(@PathParam("id") int id) {
         try {
             int rowsAffected = GeneroDao.deleteGenero(id);
             if (rowsAffected != 0) {
