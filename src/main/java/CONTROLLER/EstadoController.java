@@ -23,7 +23,7 @@ public class EstadoController {
     // Método GET para obtener todos los estados en formato JSON
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getEstados() {
+    public static Response getEstados() {
         // Lista para almacenar los objetos Estado obtenidos
         List<Estado> estados = new ArrayList<>();
         try {
@@ -58,7 +58,7 @@ public class EstadoController {
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getEstado(@PathParam("id") int id) {
+    public static Response getEstado(@PathParam("id") int id) {
         // Variable para almacenar el estado encontrado
         Estado estado = null;
         try {
@@ -91,7 +91,7 @@ public class EstadoController {
     @Validar(entidad = "Estados")  // Valida datos antes de procesar
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createEstado(Estado estadoData) {
+    public static Response createEstado(Estado estadoData) {
         try {
             int idGenerado = 0;  // Variable para capturar el ID generado
             // Ejecuta inserción y devuelve el último registro insertado
@@ -121,7 +121,7 @@ public class EstadoController {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateEstado(@PathParam("id") int id, Estado estadoData) {
+    public static Response updateEstado(@PathParam("id") int id, Estado estadoData) {
         try {
             // Verifica si el estado existe mediante llamada interna
             Response estadoExistente = getEstado(id);
@@ -148,7 +148,7 @@ public class EstadoController {
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteEstado(@PathParam("id") int id) {
+    public static Response deleteEstado(@PathParam("id") int id) {
         try {
             // Intenta eliminar el estado en la base de datos
             int rowsAffected = EstadoDao.deleteEstado(id);

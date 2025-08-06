@@ -317,13 +317,29 @@ public class UserController {
             if(existEmail(id, usuarioData)) 
                 return ResponseProvider.error("Este correo ya fué registrado.", 409);
             
+            // Verifica si la ciudad existe
             Response ciudad = CiudadController.getCiudad(usuarioData.getCiudad_id());
             
+            //valida que sea diferente a estado 200
             if(ciudad.getStatus() !=  200) return ResponseProvider.error("Esta ciudad no existe.", 409); // Conflicto
             
+            // Verifica si el genero existe
             Response genero = GeneroController.getGenero(usuarioData.getGenero_id());
             
+            //valida que sea diferente a estado 200
             if(ciudad.getStatus() !=  200) return ResponseProvider.error("Este genero no existe.", 409); // Conflicto
+
+            // Verifica si el rol existe
+            Response rol = RolController.getRol(usuarioData.getRol_id());
+            
+            //valida que sea diferente a estado 200
+            if(rol.getStatus() !=  200) return ResponseProvider.error("Este rol no existe.", 409); // Conflicto
+            
+            // Verifica si el estado existe
+            Response estado = EstadoController.getEstado(usuarioData.getEstado_id());
+            
+            //valida que sea diferente a estado 200
+            if(estado.getStatus() !=  200) return ResponseProvider.error("Este estado no existe.", 409); // Conflicto
 
             // Si la contraseña está incluida en la actualización, la procesa aparte
             if(usuarioData.getContrasena() != null) {

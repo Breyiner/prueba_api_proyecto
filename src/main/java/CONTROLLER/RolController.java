@@ -16,7 +16,7 @@ public class RolController {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)  // Devuelve JSON
-    public Response getRoles() {
+    public static Response getRoles() {
         try {
             ResultSet respuesta = RolDao.getRoles();  // Obtiene todos los roles desde la BD
             List<Rol> roles = new ArrayList<>();
@@ -40,7 +40,7 @@ public class RolController {
     @GET
     @Path("/{id}")  // Obtiene un rol específico por id
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getRol(@PathParam("id") int id) {
+    public static Response getRol(@PathParam("id") int id) {
         try {
             ResultSet respuesta = RolDao.getRolById(id);  // Consulta rol por id
             Rol rol = null;
@@ -65,7 +65,7 @@ public class RolController {
     @Validar(entidad = "Roles")  // Validación personalizada antes de crear
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createRol(Rol rolData) {
+    public static Response createRol(Rol rolData) {
         try {
             ResultSet ultimoRegistro = RolDao.createRol(rolData);  // Inserta rol en BD
             int idGenerado = 0;
@@ -88,7 +88,7 @@ public class RolController {
     @Path("/{id}")  // Actualiza un rol existente por id
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateRol(@PathParam("id") int id, Rol rolData) {
+    public static Response updateRol(@PathParam("id") int id, Rol rolData) {
         try {
             Response rolExistente = getRol(id);  // Verifica que el rol existe
             if (rolExistente.getStatus() == 404) return ResponseProvider.error("Este rol no existe.", 404);
@@ -108,7 +108,7 @@ public class RolController {
     @DELETE
     @Path("/{id}")  // Elimina un rol por id
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteRol(@PathParam("id") int id) {
+    public static Response deleteRol(@PathParam("id") int id) {
         try {
             int rowsAffected = RolDao.deleteRol(id);  // Elimina de la BD
             if (rowsAffected != 0) {
