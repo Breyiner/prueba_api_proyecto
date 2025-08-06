@@ -1,6 +1,6 @@
 package CONFIG;
 
-import UTILS.ConnectionDB;
+import DATABASE.ConnectionDB;
 import javax.ws.rs.ApplicationPath;
 import org.glassfish.jersey.server.ResourceConfig;
 

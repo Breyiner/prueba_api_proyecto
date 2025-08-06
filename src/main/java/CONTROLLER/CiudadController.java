@@ -1,80 +1,124 @@
-package CONTROLLER; // Paquete que contiene el controlador de usuarios
+package CONTROLLER;
 
-import MODEL.Ciudad;
-import MIDDLEWARES.Validar;
-import PROVIDERS.ResponseProvider;
-import SERVICES.CiudadService;
-import javax.ws.rs.Consumes; // Importa la anotación para indicar el tipo de contenido que consume el método
-import javax.ws.rs.DELETE; // Importa la anotación para manejar solicitudes DELETE
-import javax.ws.rs.GET; // Importa la anotación para manejar solicitudes GET
-import javax.ws.rs.POST; // Importa la anotación para manejar solicitudes POST
-import javax.ws.rs.PUT; // Importa la anotación para manejar solicitudes PUT
-import javax.ws.rs.Path; // Importa la anotación para definir la ruta del recurso
-import javax.ws.rs.PathParam; // Importa la anotación para extraer parámetros de la ruta
-import javax.ws.rs.Produces; // Importa la anotación para indicar el tipo de contenido que produce el método
-import javax.ws.rs.core.MediaType; // Importa la clase MediaType para definir tipos de contenido
-import javax.ws.rs.core.Response; // Importa la clase Response para construir respuestas HTTP
+import MODELO.CiudadDao;
+import MODELO.Ciudad;
 
-@Path("/ciudades") // Define la ruta base para todas las operaciones relacionadas con usuarios
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+@Path("/ciudades")
 public class CiudadController {
-    
-    @GET // Indica que este método responde a solicitudes GET
-    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getCiudades() {
-        
+        List<Ciudad> ciudades = new ArrayList<>();
         try {
-            return CiudadService.getCiudades();
-        } catch (Exception e) {
-            return ResponseProvider.error("Error al obtener las ciudades", 500);
-        } 
-    }
-    
-    @GET // Indica que este método responde a solicitudes GET
-    @Path("/{id}") // La ruta incluye el ID de la ciudad a buscar
-    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
-    public Response getCiudad(@PathParam("id") int id) {
-        
-        try {
-            return CiudadService.getCiudadById(id);
-        } catch (Exception e) {
-           return ResponseProvider.error("Error al obtener la ciudad", 500);
+            ResultSet respuesta = CiudadDao.getCiudades();
+            while (respuesta.next()) {
+                Ciudad ciudad = new Ciudad(
+                    respuesta.getInt("id"),
+                    respuesta.getString("nombre")
+                );
+                ciudades.add(ciudad);
+            }
+            respuesta.close();
+            if (!ciudades.isEmpty()) {
+                return ResponseProvider.success(ciudades, "Ciudades obtenidas con éxito.", 200);
+            } else {
+                return ResponseProvider.error("No hay ciudades registradas.", 404);
+            }
+        } catch (SQLException e) {
+            return ResponseProvider.error("Error interno al obtener las ciudades", 500);
         }
     }
-    
+
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getCiudad(@PathParam("id") int id) {
+        Ciudad ciudad = null;
+        try {
+            ResultSet respuesta = CiudadDao.getCiudadById(id);
+            while (respuesta.next()) {
+                ciudad = new Ciudad(
+                    respuesta.getInt("id"),
+                    respuesta.getString("nombre")
+                );
+            }
+            respuesta.close();
+            if (ciudad == null) {
+                return ResponseProvider.error("La ciudad no existe.", 404);
+            } else {
+                return ResponseProvider.success(ciudad, "Ciudad obtenida con éxito.", 200);
+            }
+        } catch (SQLException e) {
+            return ResponseProvider.error("Error interno al obtener la ciudad", 500);
+        }
+    }
+
     @POST
     @Validar(entidad = "Ciudades")
-    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
-    @Consumes(MediaType.APPLICATION_JSON) // Indica que el método acepta datos en formato JSON
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response createCiudad(Ciudad ciudadData) {
-        
         try {
-            return CiudadService.createCiudad(ciudadData);
-        } catch (Exception e) {
-           return ResponseProvider.error("Error al crear la ciudad", 500);
+            int idGenerado = 0;
+            ResultSet ultimoRegistro = CiudadDao.createCiudad(ciudadData);
+            while (ultimoRegistro.next()) {
+                idGenerado = ultimoRegistro.getInt(1);
+                ciudadData.setId(idGenerado);
+            }
+            ultimoRegistro.close();
+            if (idGenerado == 0) {
+                return ResponseProvider.error("Error al crear la ciudad.", 400);
+            } else {
+                return ResponseProvider.success(ciudadData, "Ciudad creada con éxito.", 200);
+            }
+        } catch (SQLException e) {
+            return ResponseProvider.error("Error interno al crear la ciudad.", 500);
         }
     }
-    
-    @PUT // Indica que este método responde a solicitudes PUT
-    @Path("/{id}") // Ruta con el ID de la ciudad a actualizar
-    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
-    @Consumes(MediaType.APPLICATION_JSON) // Indica que el método acepta datos en formato JSON
+
+    @PUT
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response updateCiudad(@PathParam("id") int id, Ciudad ciudadData) {
         try {
-            return CiudadService.updateCiudad(id, ciudadData);
+            Response ciudadExistente = getCiudad(id);
+            if (ciudadExistente.getStatus() == 404)
+                return ResponseProvider.error("Esta ciudad no existe.", 404);
+            int rowsAffected = CiudadDao.updateCiudad(id, ciudadData);
+            if (rowsAffected != 0) {
+                ciudadData.setId(id);
+                return ResponseProvider.success(ciudadData, "Ciudad actualizada con éxito.", 200);
+            } else {
+                return ResponseProvider.error("Error al actualizar la ciudad.", 400);
+            }
         } catch (Exception e) {
-           return ResponseProvider.error("Error al actualizar la ciudad", 500);
+            return ResponseProvider.error("Error interno al actualizar la ciudad.", 500);
         }
     }
-    
-    @DELETE // Indica que este método responde a solicitudes DELETE
-    @Path("/{id}") // Ruta con el ID de la ciudad a eliminar
-    @Produces(MediaType.APPLICATION_JSON) // Especifica que el método devuelve datos en formato JSON
+
+    @DELETE
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response deleteCiudad(@PathParam("id") int id) {
-     
         try {
-            return CiudadService.deleteCiudad(id);
+            int rowsAffected = CiudadDao.deleteCiudad(id);
+            if (rowsAffected != 0) {
+                return ResponseProvider.success(null, "Ciudad eliminada con éxito.", 200);
+            } else {
+                return ResponseProvider.error("Esta ciudad no existe.", 404);
+            }
         } catch (Exception e) {
-           return ResponseProvider.error("Error al eliminar la ciudad", 500);
+            return ResponseProvider.error("Error interno al eliminar la ciudad.", 500);
         }
     }
 }
