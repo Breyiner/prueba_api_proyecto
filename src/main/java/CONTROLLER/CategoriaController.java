@@ -96,7 +96,7 @@ public class CategoriaController { // Clase que gestiona las operaciones CRUD de
             if (!lista.isEmpty()) {
                 return ResponseProvider.success(lista, "Categorías obtenidas con éxito.", 200);
             } else {
-                return ResponseProvider.success(null, "No hay categorías registradas.", 200);
+                return ResponseProvider.error("No hay categorías registradas.", 404);
             }
 
         } catch (SQLException e) {
@@ -193,7 +193,7 @@ public class CategoriaController { // Clase que gestiona las operaciones CRUD de
             
             Response haveMovs = MovimientoController.getMovimientosByCategoriaId(id);
             
-            if(haveMovs.getEntity() != null) return ResponseProvider.error("Esta categoria tiene movimientos relacionados, no se puede eliminar.", 409);
+            if(haveMovs.getStatus() == 200) return ResponseProvider.error("Esta categoria tiene movimientos relacionados, no se puede eliminar.", 409);
             
             int filasAfectadas = CategoriaDao.deleteCategoria(id); // Intenta eliminar la categoría.
 

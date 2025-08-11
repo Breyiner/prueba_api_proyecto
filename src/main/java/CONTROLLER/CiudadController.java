@@ -10,6 +10,7 @@ import java.sql.ResultSet;          // Resultado de consultas SQL
 import java.sql.SQLException;      // Manejo de excepciones SQL
 import java.util.ArrayList;        // Lista dinámica
 import java.util.List;             // Interfaz lista
+import MODELO.Usuario;                 // Entidad Usuario que representa datos de usuario
 
 @Path("/ciudades") // Ruta base para recursos ciudad
 public class CiudadController {
@@ -112,6 +113,11 @@ public class CiudadController {
     @Produces(MediaType.APPLICATION_JSON)
     public static Response deleteCiudad(@PathParam("id") int id) {
         try {
+            
+            Response respuesta = UserController.getUsuariosByCiudadId(id);
+            
+            if(respuesta.getStatus() == 200) return ResponseProvider.error("Esta ciudad tiene usuarios relacionados, no se puede eliminar.", 409);
+            
             int rowsAffected = CiudadDao.deleteCiudad(id); // Eliminar en DB
             if (rowsAffected != 0) {
                 return ResponseProvider.success(null, "Ciudad eliminada con éxito.", 200); // Éxito eliminación
@@ -119,6 +125,7 @@ public class CiudadController {
                 return ResponseProvider.error("Esta ciudad no existe.", 404); // No existe ciudad
             }
         } catch (Exception e) {
+            System.out.print(e);
             return ResponseProvider.error("Error interno al eliminar la ciudad.", 500); // Error DB
         }
     }

@@ -164,7 +164,7 @@ public class TiposMovimientoController {
             
             Response haveCats = CategoriaController.getCategoriasByTipoMovimiento(id);
             
-            if(haveCats.getEntity() != null) return ResponseProvider.error("Este tipo de movimiento tiene categorias relacionadas, no se puede eliminar.", 409);
+            if(haveCats.getStatus() == 200) return ResponseProvider.error("Este tipo de movimiento tiene categorias relacionadas, no se puede eliminar.", 409);
             
             int filasAfectadas = TiposMovimientoDao.deleteTipo(id);
 

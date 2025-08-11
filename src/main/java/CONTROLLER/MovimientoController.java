@@ -76,7 +76,7 @@ public class MovimientoController {
     }
     
     @GET
-    @Path("tipoMovimiento/{categoria_id}")
+    @Path("categoria/{categoria_id}")
     @Produces(MediaType.APPLICATION_JSON)  // Responde en formato JSON
     // Endpoint para obtener todos los movimientos registrados en la base de datos
     public static Response getMovimientosByCategoriaId(@PathParam("categoria_id") int categoria_id) {
@@ -117,7 +117,7 @@ public class MovimientoController {
                 return ResponseProvider.success(movimientos, "movimientos obtenidos con éxito.", 200);
             } else {
                 // Aunque la lista esté vacía, se devuelve con estado 200 para indicar que no hay errores
-                return ResponseProvider.success(null, "No hay movimientos registrados.", 200);
+                return ResponseProvider.error("No hay movimientos registrados.", 404);
             }
 
         } catch (SQLException e) {

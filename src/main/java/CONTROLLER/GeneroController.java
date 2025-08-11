@@ -111,6 +111,11 @@ public class GeneroController {
     @Produces(MediaType.APPLICATION_JSON)
     public static Response deleteGenero(@PathParam("id") int id) {
         try {
+            
+            Response haveUsers = UserController.getUsuariosByGeneroId(id);
+            
+            if(haveUsers.getStatus() == 200) return ResponseProvider.error("Este género tiene usuarios relacionados, no se puede eliminar.", 409);
+                        
             int rowsAffected = GeneroDao.deleteGenero(id);
             if (rowsAffected != 0) {
                 return ResponseProvider.success(null, "Género eliminado con éxito.", 200);

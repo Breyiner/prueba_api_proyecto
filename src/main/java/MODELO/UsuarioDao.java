@@ -108,6 +108,40 @@ public class UsuarioDao {
         }
     }
     
+    public static ResultSet getUsuariosByCiudadId(int ciudad_id) {
+        
+        Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
+        
+        try {
+            // Prepara la consulta SQL para seleccionar los usuarios por id de ciudad
+            PreparedStatement pstm = connection.prepareStatement("SELECT * FROM usuarios WHERE ciudad_id = ?");
+            pstm.setInt(1, ciudad_id); // Establece el ID en la consulta
+            ResultSet respuesta = pstm.executeQuery(); // Ejecuta la consulta y obtiene los resultados
+            
+            return respuesta; // Devuelve el ResultSet con los usuarios encontrados
+            
+        } catch (SQLException e) {
+            throw new Error("Error al obtener los usuarios");
+        }
+    }
+    
+    public static ResultSet getUsuariosByGeneroId(int genero_id) {
+        
+        Connection connection = ConnectionDB.connect(); // Establece la conexión a la base de datos
+        
+        try {
+            // Prepara la consulta SQL para seleccionar los usuarios por id de genero
+            PreparedStatement pstm = connection.prepareStatement("SELECT * FROM usuarios WHERE genero_id = ?");
+            pstm.setInt(1, genero_id); // Establece el ID en la consulta
+            ResultSet respuesta = pstm.executeQuery(); // Ejecuta la consulta y obtiene los resultados
+            
+            return respuesta; // Devuelve el ResultSet con los usuarios encontrados
+            
+        } catch (SQLException e) {
+            throw new Error("Error al obtener los usuarios");
+        }
+    }
+    
     /**
      * Método para obtener un usuario específico por su correo electrónico.
      * Realiza una consulta SQL para seleccionar el usuario con el correo proporcionado.

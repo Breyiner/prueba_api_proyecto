@@ -75,6 +75,95 @@ public class UserController {
             return ResponseProvider.error("Error interno al obtener los usuarios", 500);
         }
     }
+    
+    @GET
+    @Path("ciudad/{ciudad_id}")
+    @Produces(MediaType.APPLICATION_JSON) // Indica que la respuesta será en formato JSON
+    public static Response getUsuariosByCiudadId(@PathParam("ciudad_id") int ciudad_id) {
+        List<Usuario> usuarios = new ArrayList<>(); // Lista para almacenar objetos Usuario
+
+        try {
+            // Llama a la capa DAO para obtener el conjunto de usuarios de la base de datos
+            ResultSet respuesta = UsuarioDao.getUsuariosByCiudadId(ciudad_id);
+
+            // Itera el ResultSet para construir objetos Usuario con los datos obtenidos
+            while (respuesta.next()) {
+                Usuario usuario = new Usuario(
+                    respuesta.getInt("id"),                      // ID único del usuario
+                    respuesta.getString("nombre"),               // Nombre del usuario
+                    respuesta.getString("apellido"),             // Apellido del usuario
+                    respuesta.getString("correo"),               // Correo electrónico
+                    respuesta.getString("contrasena"),           // Contraseña encriptada (ideal no enviar)
+                    Integer.parseInt(respuesta.getString("genero_id")),   // ID del género
+                    Integer.parseInt(respuesta.getString("ciudad_id")),   // ID de la ciudad
+                    respuesta.getInt("rol_id"),                   // ID del rol asignado
+                    Integer.parseInt(respuesta.getString("estado_id"))    // ID del estado del usuario (activo/inactivo)
+                );
+
+                // Agrega cada objeto Usuario a la lista
+                usuarios.add(usuario);
+            }
+
+            // Cierra el ResultSet para liberar recursos y evitar fugas
+            respuesta.close();
+
+            // Si la lista tiene usuarios, retorna con código 200 OK y lista; si está vacía retorna mensaje con 200
+            if (!usuarios.isEmpty()) {
+                return ResponseProvider.success(usuarios, "Usuarios obtenidos con éxito.", 200);
+            } else {
+                return ResponseProvider.error("No hay usuarios relacionados.", 404);
+            }
+
+        } catch (SQLException e) {
+            System.out.print(e);
+            // Si ocurre una excepción SQL, retorna un error 500 indicando problema interno
+            return ResponseProvider.error("Error interno al obtener los usuarios", 500);
+        }
+    }
+    
+    @GET
+    @Path("genero/{genero_id}")
+    @Produces(MediaType.APPLICATION_JSON) // Indica que la respuesta será en formato JSON
+    public static Response getUsuariosByGeneroId(@PathParam("genero_id") int genero_id) {
+        List<Usuario> usuarios = new ArrayList<>(); // Lista para almacenar objetos Usuario
+
+        try {
+            // Llama a la capa DAO para obtener el conjunto de usuarios de la base de datos
+            ResultSet respuesta = UsuarioDao.getUsuariosByGeneroId(genero_id);
+
+            // Itera el ResultSet para construir objetos Usuario con los datos obtenidos
+            while (respuesta.next()) {
+                Usuario usuario = new Usuario(
+                    respuesta.getInt("id"),                      // ID único del usuario
+                    respuesta.getString("nombre"),               // Nombre del usuario
+                    respuesta.getString("apellido"),             // Apellido del usuario
+                    respuesta.getString("correo"),               // Correo electrónico
+                    respuesta.getString("contrasena"),           // Contraseña encriptada (ideal no enviar)
+                    Integer.parseInt(respuesta.getString("genero_id")),   // ID del género
+                    Integer.parseInt(respuesta.getString("ciudad_id")),   // ID de la ciudad
+                    respuesta.getInt("rol_id"),                   // ID del rol asignado
+                    Integer.parseInt(respuesta.getString("estado_id"))    // ID del estado del usuario (activo/inactivo)
+                );
+
+                // Agrega cada objeto Usuario a la lista
+                usuarios.add(usuario);
+            }
+
+            // Cierra el ResultSet para liberar recursos y evitar fugas
+            respuesta.close();
+
+            // Si la lista tiene usuarios, retorna con código 200 OK y lista; si está vacía retorna mensaje con 200
+            if (!usuarios.isEmpty()) {
+                return ResponseProvider.success(usuarios, "Usuarios obtenidos con éxito.", 200);
+            } else {
+                return ResponseProvider.success(null, "No hay usuarios relacionados.", 404);
+            }
+
+        } catch (SQLException e) {
+            // Si ocurre una excepción SQL, retorna un error 500 indicando problema interno
+            return ResponseProvider.error("Error interno al obtener los usuarios", 500);
+        }
+    }
 
     /**
      * Método para obtener usuarios en formato tabla con campos detallados para UI.
