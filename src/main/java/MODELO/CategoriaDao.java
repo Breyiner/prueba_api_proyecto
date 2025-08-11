@@ -20,6 +20,24 @@ public class CategoriaDao {  // Clase para operaciones CRUD con la tabla categor
         }
     }
     
+    // Método para obtener todas las categoría con el nombre del tipo de movimiento
+    public static ResultSet getCategoriasNombres() {
+        Connection connection = ConnectionDB.connect();  // Conecta a la BD
+        String query = """
+                       select cat.id, cat.nombre, cat.icono, tim.nombre as tipo_movimiento 
+                       from categorias cat
+                       inner join tipos_movimiento tim on tim.id = cat.tipo_movimiento_id
+                       order by tim.id;
+                       """;
+        try {
+            PreparedStatement pstm = connection.prepareStatement(query);  // Prepara consulta
+            return pstm.executeQuery();  // Ejecuta y retorna resultados
+        } catch (SQLException e) {
+            throw new Error("Error al obtener las categorías");  // Si falla, lanza error
+        }
+    }
+            
+    
     // Obtener categorías filtradas por tipo_movimiento_id
     public static ResultSet getCategoriasByMovimientoId(int tipo_movimiento_id) {
         Connection connection = ConnectionDB.connect();  // Conexión BD

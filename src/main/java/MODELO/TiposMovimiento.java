@@ -5,14 +5,16 @@ public class TiposMovimiento {
     private String nombre;
     private String icono;
     private String color;
+    private String color_bg;
 
     public TiposMovimiento() {}
 
-    public TiposMovimiento(int id, String nombre, String icono, String color) {
+    public TiposMovimiento(int id, String nombre, String icono, String color, String color_bg) {
         this.id = id;
         this.nombre = nombre;
         this.icono = icono;
         this.color = color;
+        this.color_bg = color_bg;
     }
 
     public int getId() {
@@ -46,4 +48,14 @@ public class TiposMovimiento {
     public void setColor(String color) {
         this.color = color;
     }
+
+    public String getColor_bg() {
+        return color_bg;
+    }
+
+    public void setColor_bg(String color_bg) {
+        this.color_bg = color_bg;
+    }
+    
+    
 }

@@ -68,7 +68,7 @@ public class MovimientoDao {
     }
     
     // Obtiene movimientos filtrados por categoría, usuario, tipo de movimiento y mes
-    public static ResultSet getMovimientosByCategoria(int categoria_id, int usuario_id, int tipo_movimiento_id, int mes) {
+    public static ResultSet getMovimientosDetailsByCategoria(int categoria_id, int usuario_id, int tipo_movimiento_id, int mes) {
         Connection connection = ConnectionDB.connect();  // Abre conexión
         
         String query =  """
@@ -167,6 +167,18 @@ public class MovimientoDao {
             return pstm.executeQuery();  // Ejecuta y retorna resultado
         } catch (SQLException e) {
             throw new Error("Error al obtener los movimientos");  // Error
+        }
+    }
+    
+        // Obtiene todos los movimientos sin filtro
+    public static ResultSet getMovimientosBYCategoriaId(int categoria_id) {
+        Connection connection = ConnectionDB.connect();  // Abre conexión
+        try {
+            PreparedStatement pstm = connection.prepareStatement("SELECT * FROM movimientos where categoria_id = ?");  // Prepara consulta
+            pstm.setInt(1, categoria_id);
+            return pstm.executeQuery();  // Ejecuta y devuelve resultado
+        } catch (SQLException e) {
+            throw new Error("Error al obtener los movimientos");  // Manejo básico de error
         }
     }
 

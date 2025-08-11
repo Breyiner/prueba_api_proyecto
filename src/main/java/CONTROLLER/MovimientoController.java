@@ -74,6 +74,57 @@ public class MovimientoController {
             return ResponseProvider.error("Error interno al obtener los movimientos", 500);
         }
     }
+    
+    @GET
+    @Path("tipoMovimiento/{categoria_id}")
+    @Produces(MediaType.APPLICATION_JSON)  // Responde en formato JSON
+    // Endpoint para obtener todos los movimientos registrados en la base de datos
+    public static Response getMovimientosByCategoriaId(@PathParam("categoria_id") int categoria_id) {
+        List<Movimiento> movimientos = new ArrayList<>();  // Lista donde se almacenarán los movimientos obtenidos
+
+        try {
+            // Invoca el método DAO para obtener todos los movimientos
+            ResultSet rs = MovimientoDao.getMovimientosBYCategoriaId(categoria_id);
+
+            // Recorre el conjunto de resultados fila por fila
+            while (rs.next()) {
+                // Extrae la descripción, si es null asigna cadena vacía para evitar NullPointerException
+                String descripcion = rs.getString("descripcion");
+                if (descripcion == null) descripcion = "";
+
+                // Crea un objeto Movimiento con los datos obtenidos en la fila actual
+                Movimiento movimiento = new Movimiento(
+                    rs.getInt("id"),                 // ID único del movimiento
+                    rs.getInt("usuario_id"),         // ID del usuario propietario del movimiento
+                    rs.getString("nombre"),          // Nombre o título del movimiento
+                    rs.getBigDecimal("monto"),       // Monto asociado al movimiento
+                    descripcion,                    // Descripción (puede estar vacía)
+                    rs.getInt("categoria_id")        // ID de la categoría del movimiento
+                );
+
+                // Asigna la fecha de creación directamente desde la base de datos
+                movimiento.setFecha_creacion(rs.getString("fecha_creacion"));
+
+                // Agrega el objeto movimiento a la lista de resultados
+                movimientos.add(movimiento);
+            }
+
+            // Cierra el ResultSet para liberar recursos
+            rs.close();
+
+            // Retorna la lista con un mensaje y código HTTP 200 OK
+            if (!movimientos.isEmpty()) {
+                return ResponseProvider.success(movimientos, "movimientos obtenidos con éxito.", 200);
+            } else {
+                // Aunque la lista esté vacía, se devuelve con estado 200 para indicar que no hay errores
+                return ResponseProvider.success(null, "No hay movimientos registrados.", 200);
+            }
+
+        } catch (SQLException e) {
+            // En caso de error en la base de datos, se retorna error HTTP 500 (Error interno)
+            return ResponseProvider.error("Error interno al obtener los movimientos", 500);
+        }
+    }
 
     @GET
     @Path("/cantidad") // Extiende la ruta base, accediendo a /movimientos/cantidad
@@ -209,7 +260,7 @@ public class MovimientoController {
     @Path("/categoria/{cat_id}/usuario/{usuario_id}/tipoMovimiento/{tipo_id}/mes/{mes}")
     @Produces(MediaType.APPLICATION_JSON)
     // Obtiene movimientos filtrados por categoría, usuario, tipo de movimiento y mes
-    public static Response getMovimientosPorCategoria(
+    public static Response getMovimientosDetailsPorCategoria(
         @PathParam("cat_id") int categoria_id,
         @PathParam("usuario_id") int usuario_id,
         @PathParam("tipo_id") int tipo_movimiento_id,
@@ -219,7 +270,7 @@ public class MovimientoController {
 
         try {
             // Ejecuta la consulta filtrada según los parámetros recibidos
-            ResultSet rs = MovimientoDao.getMovimientosByCategoria(categoria_id, usuario_id, tipo_movimiento_id, mes);
+            ResultSet rs = MovimientoDao.getMovimientosDetailsByCategoria(categoria_id, usuario_id, tipo_movimiento_id, mes);
 
             // Construye objetos DTO para cada fila del resultado
             while(rs.next()) {

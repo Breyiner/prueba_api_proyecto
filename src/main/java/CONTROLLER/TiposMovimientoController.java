@@ -30,7 +30,8 @@ public class TiposMovimientoController {
                     rs.getInt("id"),
                     rs.getString("nombre"),
                     rs.getString("icono"),
-                    rs.getString("color")
+                    rs.getString("color"),
+                    rs.getString("color_bg")
                 );
                 lista.add(tm);
             }
@@ -64,7 +65,8 @@ public class TiposMovimientoController {
                     rs.getInt("id"),
                     rs.getString("nombre"),
                     rs.getString("icono"),
-                    rs.getString("color")
+                    rs.getString("color"),
+                    rs.getString("color_bg")
                 );
             }
             rs.close();
@@ -126,7 +128,8 @@ public class TiposMovimientoController {
                     rsCheck.getInt("id"),
                     rsCheck.getString("nombre"),
                     rsCheck.getString("icono"),
-                    rsCheck.getString("color")
+                    rsCheck.getString("color"),
+                    rsCheck.getString("color_bg")
                 );
             }
             rsCheck.close();
@@ -158,6 +161,11 @@ public class TiposMovimientoController {
     // Elimina un tipo de movimiento por ID
     public Response deleteTipoMovimiento(@PathParam("id") int id) {
         try {
+            
+            Response haveCats = CategoriaController.getCategoriasByTipoMovimiento(id);
+            
+            if(haveCats.getEntity() != null) return ResponseProvider.error("Este tipo de movimiento tiene categorias relacionadas, no se puede eliminar.", 409);
+            
             int filasAfectadas = TiposMovimientoDao.deleteTipo(id);
 
             if (filasAfectadas != 0) {

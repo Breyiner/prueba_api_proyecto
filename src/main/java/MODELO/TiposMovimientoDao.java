@@ -35,12 +35,13 @@ public class TiposMovimientoDao {
     // Método para crear un nuevo tipo de movimiento, devuelve claves generadas
     public static ResultSet createTipo(TiposMovimiento tiposMovimientoData) {
         Connection connection = ConnectionDB.connect();  // Abre conexión
-        String query = "INSERT INTO tipos_movimiento (nombre, icono, color) VALUES (?, ?, ?)";  // Consulta de inserción
+        String query = "INSERT INTO tipos_movimiento (nombre, icono, color, color_bg) VALUES (?, ?, ?, ?)";  // Consulta de inserción
         try {
             PreparedStatement pstm = connection.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);  // Preparar para obtener ID generado
             pstm.setString(1, tiposMovimientoData.getNombre());  // Asignar nombre
             pstm.setString(2, tiposMovimientoData.getIcono());   // Asignar icono
             pstm.setString(3, tiposMovimientoData.getColor());   // Asignar color
+            pstm.setString(4, tiposMovimientoData.getColor_bg());   // Asignar color de fondo
             pstm.executeUpdate();  // Ejecutar inserción
             return pstm.getGeneratedKeys();  // Retornar el ID generado
         } catch (SQLException e) {

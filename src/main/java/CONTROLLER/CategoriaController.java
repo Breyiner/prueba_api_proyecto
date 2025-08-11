@@ -2,6 +2,7 @@ package CONTROLLER; // Define que esta clase pertenece al paquete CONTROLLER, en
 
 import MODELO.CategoriaDao; // Importa la clase que se comunica con la base de datos para operaciones sobre categorías.
 import MODELO.Categoria; // Importa el modelo de datos de la categoría.
+import MODELO.CategoriaDTO;
 
 import javax.ws.rs.*; // Importa las anotaciones necesarias para crear servicios REST (como @GET, @POST, etc.).
 import javax.ws.rs.core.MediaType; // Especifica el tipo de contenido (JSON, XML, etc.).
@@ -16,7 +17,7 @@ public class CategoriaController { // Clase que gestiona las operaciones CRUD de
 
     @GET // Indica que este método responde a peticiones GET.
     @Produces(MediaType.APPLICATION_JSON) // Especifica que la respuesta será en formato JSON.
-    public Response getCategorias() { // Método para obtener todas las categorías registradas.
+    public static Response getCategorias() { // Método para obtener todas las categorías registradas.
         List<Categoria> lista = new ArrayList<>(); // Lista para almacenar las categorías recuperadas.
 
         try {
@@ -43,10 +44,40 @@ public class CategoriaController { // Clase que gestiona las operaciones CRUD de
         }
     }
 
+    @GET // Indica que este método responde a peticiones GET.
+    @Produces(MediaType.APPLICATION_JSON) // Especifica que la respuesta será en formato JSON.
+    @Path("nombres") // Ruta para obtener categorías
+    public static Response getCategoriasNombres() { // Método para obtener todas las categorías registradas con el nombre del tipo de movimiento.
+        List<CategoriaDTO> lista = new ArrayList<>(); // Lista para almacenar las categorías recuperadas.
+
+        try {
+            ResultSet rs = CategoriaDao.getCategoriasNombres(); // Ejecuta la consulta que obtiene todas las categorías.
+            while (rs.next()) { // Recorre cada fila del resultado.
+                CategoriaDTO categoria = new CategoriaDTO( // Crea una nueva instancia de categoría con los datos recuperados.
+                    rs.getInt("id"),
+                    rs.getString("nombre"),
+                    rs.getString("icono"),
+                    rs.getString("tipo_movimiento")
+                );
+                lista.add(categoria); // Agrega la categoría a la lista.
+            }
+            rs.close(); // Cierra el ResultSet para liberar recursos.
+
+            if (!lista.isEmpty()) { // Si se encontraron categorías...
+                return ResponseProvider.success(lista, "Categorías obtenidas con éxito.", 200);
+            } else {
+                return ResponseProvider.error("No hay categorías registradas.", 404); // Si la lista está vacía.
+            }
+
+        } catch (SQLException e) {
+            return ResponseProvider.error("Error interno al obtener las categorías", 500); // Si ocurre un error en la consulta.
+        }
+    }
+
     @GET
-    @Path("tipoMovimiento/{tipo_movimiento_id}") // Ruta para obtener categorías por tipo de movimiento.
+    @Path("/tipoMovimiento/{tipo_movimiento_id}") // Ruta para obtener categorías por tipo de movimiento.
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getCategoriasByTipoMovimiento(@PathParam("tipo_movimiento_id") int tipo_movimiento_id) {
+    public static Response getCategoriasByTipoMovimiento(@PathParam("tipo_movimiento_id") int tipo_movimiento_id) {
         List<Categoria> lista = new ArrayList<>();
 
         try {
@@ -65,7 +96,7 @@ public class CategoriaController { // Clase que gestiona las operaciones CRUD de
             if (!lista.isEmpty()) {
                 return ResponseProvider.success(lista, "Categorías obtenidas con éxito.", 200);
             } else {
-                return ResponseProvider.error("No hay categorías registradas.", 404);
+                return ResponseProvider.success(null, "No hay categorías registradas.", 200);
             }
 
         } catch (SQLException e) {
@@ -76,7 +107,7 @@ public class CategoriaController { // Clase que gestiona las operaciones CRUD de
     @GET
     @Path("/{id}") // Ruta para obtener una categoría específica por ID.
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getCategoria(@PathParam("id") int id) {
+    public static Response getCategoria(@PathParam("id") int id) {
         Categoria categoria = null;
 
         try {
@@ -107,7 +138,7 @@ public class CategoriaController { // Clase que gestiona las operaciones CRUD de
     @Validar(entidad = "Categorias") // Aplica validación automática a los datos recibidos.
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON) // Indica que el contenido recibido será JSON.
-    public Response createCategoria(Categoria categoriaData) {
+    public static Response createCategoria(Categoria categoriaData) {
         try {
             int idGenerado = 0; // Almacena el ID generado por la base de datos.
             ResultSet rs = CategoriaDao.createCategoria(categoriaData); // Ejecuta la inserción en la base de datos.
@@ -133,7 +164,7 @@ public class CategoriaController { // Clase que gestiona las operaciones CRUD de
     @Path("/{id}") // Ruta para actualizar una categoría específica.
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateCategoria(@PathParam("id") int id, Categoria categoriaData) {
+    public static Response updateCategoria(@PathParam("id") int id, Categoria categoriaData) {
         try {
             Response existente = getCategoria(id); // Verifica si la categoría existe.
 
@@ -157,8 +188,13 @@ public class CategoriaController { // Clase que gestiona las operaciones CRUD de
     @DELETE
     @Path("/{id}") // Ruta para eliminar una categoría por ID.
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteCategoria(@PathParam("id") int id) {
+    public static Response deleteCategoria(@PathParam("id") int id) {
         try {
+            
+            Response haveMovs = MovimientoController.getMovimientosByCategoriaId(id);
+            
+            if(haveMovs.getEntity() != null) return ResponseProvider.error("Esta categoria tiene movimientos relacionados, no se puede eliminar.", 409);
+            
             int filasAfectadas = CategoriaDao.deleteCategoria(id); // Intenta eliminar la categoría.
 
             if (filasAfectadas != 0) {
