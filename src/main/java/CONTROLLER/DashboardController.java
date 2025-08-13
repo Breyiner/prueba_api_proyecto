@@ -1,212 +1,285 @@
-package CONTROLLER; // Paquete de controladores REST
+package CONTROLLER; // Define que esta clase pertenece al paquete CONTROLLER, encargado de la lógica de control del sistema.
 
-import MODELO.DashboardDao; // DAO para consultas de dashboard
-import MODELO.ResumenCardDTO; // DTO para resumenes en formato tarjeta
-import MODELO.ResumenCategoriasDTO; // DTO para resumen detallado por categorías
-import MODELO.ResumenMetasDTO; // DTO para resumen detallado de metas
-import javax.ws.rs.*; // Anotaciones JAX-RS para definir endpoints REST
-import javax.ws.rs.core.MediaType; // Para definir tipos de contenido (JSON)
-import javax.ws.rs.core.Response; // Para construir respuestas HTTP
-import java.math.BigDecimal; // Para manejo exacto de números decimales
-import java.sql.ResultSet; // Resultado de consultas SQL
-import java.sql.SQLException; // Excepciones SQL
-import java.util.ArrayList; // Implementación dinámica de listas
-import java.util.List; // Interfaz para listas
+import MODELO.DashboardDao; // Importa la clase DAO para consultas relacionadas con el dashboard financiero.
+import MODELO.ResumenCardDTO; // Importa el DTO para resúmenes en formato de tarjeta (movimientos y metas).
+import MODELO.ResumenCategoriasDTO; // Importa el DTO para resúmenes detallados por categorías.
+import MODELO.ResumenMetasDTO; // Importa el DTO para resúmenes detallados de metas.
+import javax.ws.rs.*; // Importa anotaciones JAX-RS para definir endpoints REST (GET, Path, etc.).
+import javax.ws.rs.core.MediaType; // Define los tipos de contenido para entradas y salidas (por ejemplo, JSON).
+import javax.ws.rs.core.Response; // Permite construir respuestas HTTP con códigos de estado y datos.
+import java.math.BigDecimal; // Clase para manejar cálculos precisos con números decimales.
+import java.sql.ResultSet; // Clase para manejar resultados de consultas SQL.
+import java.sql.SQLException; // Maneja excepciones relacionadas con operaciones SQL.
+import java.util.ArrayList; // Implementación de lista dinámica para almacenar objetos.
+import java.util.List; // Interfaz para colecciones de tipo lista.
 
-@Path("/dashboard") // Ruta base para este controlador REST
-public class DashboardController { // Controlador para endpoints del dashboard financiero
+@Path("/dashboard") // Define la ruta base para todos los endpoints REST relacionados con el dashboard.
+public class DashboardController { // Clase que gestiona las operaciones para mostrar datos financieros en el dashboard.
 
-    @GET // Método HTTP GET
-    @Path("/movimientos/usuario/{usuario_id}/mes/{mes}") // Endpoint para resumen de movimientos según usuario y mes
-    @Produces(MediaType.APPLICATION_JSON) // Responde con JSON
+    /**
+     * Método para obtener un resumen de movimientos financieros de un usuario en un mes específico.
+     * Responde a solicitudes GET en /dashboard/movimientos/usuario/{usuario_id}/mes/{mes}.
+     * @param usuario_id Identificador único del usuario.
+     * @param mes Mes para el cual se solicita el resumen (1-12).
+     * @return Response HTTP con la lista de resúmenes en formato tarjeta o un mensaje de error.
+     */
+    @GET
+    @Path("/movimientos/usuario/{usuario_id}/mes/{mes}") // Ruta con parámetros para usuario y mes.
+    @Produces(MediaType.APPLICATION_JSON) // Especifica que la respuesta será en formato JSON.
     public Response getResumenMovimientos(
-            @PathParam("usuario_id") int usuario_id, // Parámetro path: ID usuario
-            @PathParam("mes") int mes) { // Parámetro path: mes consultado
-        List<ResumenCardDTO> resumen = new ArrayList<>(); // Lista para almacenar tarjetas resumen
+            @PathParam("usuario_id") int usuario_id, // ID del usuario.
+            @PathParam("mes") int mes) { // Mes consultado.
+        List<ResumenCardDTO> resumen = new ArrayList<>(); // Lista para almacenar tarjetas de resumen.
 
         try {
-            ResultSet rs = DashboardDao.getResumenMovimientos(usuario_id, mes); // Ejecuta consulta movimientos
-            while (rs.next()) { // Itera sobre cada fila del resultado
-                ResumenCardDTO card = new ResumenCardDTO( // Crea DTO con los datos de la fila
-                    rs.getString("icono"), // Icono del tipo de movimiento
-                    rs.getString("color"), // Color asociado
-                    rs.getString("nombre"), // Nombre del tipo de movimiento
-                    rs.getBigDecimal("total"), // Total calculado
-                    "movimiento" // Indica que es un resumen de movimiento
+            // Llama al método DAO para obtener el resumen de movimientos del usuario en el mes especificado.
+            ResultSet rs = DashboardDao.getResumenMovimientos(usuario_id, mes);
+
+            // Itera sobre el ResultSet para construir objetos ResumenCardDTO.
+            while (rs.next()) {
+                ResumenCardDTO card = new ResumenCardDTO(
+                    rs.getString("icono"),      // Icono del tipo de movimiento (ej. ícono de ingresos o gastos).
+                    rs.getString("color"),      // Color asociado al tipo de movimiento.
+                    rs.getString("nombre"),     // Nombre del tipo de movimiento (ej. Ingresos, Gastos).
+                    rs.getBigDecimal("total"),  // Total acumulado de los movimientos.
+                    "movimiento"                // Identificador del tipo de resumen.
                 );
-                resumen.add(card); // Agrega DTO a la lista
-            }
-            rs.close(); // Cierra el ResultSet para liberar recursos
-
-            if (!resumen.isEmpty()) { // Si hay resultados
-                return ResponseProvider.success(resumen, "Resumen de movimientos obtenido con éxito.", 200); // Respuesta exitosa
-            } else { // Si no hay resultados
-                return ResponseProvider.error("No hay movimientos registrados para este mes.", 404); // Error 404: no encontrado
+                resumen.add(card); // Agrega la tarjeta a la lista.
             }
 
-        } catch (SQLException e) { // Captura errores SQL
-            return ResponseProvider.error("Error interno al obtener el resumen de movimientos.", 500); // Error 500 interno
-        }
-    }
+            // Cierra el ResultSet para liberar recursos.
+            rs.close();
 
-    @GET
-    @Path("/metas/usuario/{usuario_id}/mes/{mes}") // Endpoint para resumen de metas por usuario y mes
-    @Produces(MediaType.APPLICATION_JSON) // Responde JSON
-    public Response getResumenMetas(
-            @PathParam("usuario_id") int usuario_id, // ID usuario
-            @PathParam("mes") int mes) { // Mes consultado
-        List<ResumenCardDTO> resumen = new ArrayList<>(); // Lista para tarjetas resumen
-
-        try {
-            ResultSet rs = DashboardDao.getResumenMetas(usuario_id, mes); // Ejecuta consulta resumen metas
-            while (rs.next()) { // Itera filas resultado
-                ResumenCardDTO card = new ResumenCardDTO( // Crea DTO resumen meta
-                    rs.getString("icono"),
-                    rs.getString("color"),
-                    rs.getString("nombre"),
-                    rs.getBigDecimal("total"),
-                    "meta" // Indica que es una meta
-                );
-                resumen.add(card); // Agrega DTO a la lista
-            }
-            rs.close(); // Cierra ResultSet
-
-            if (!resumen.isEmpty()) { // Si hay resultados
-                return ResponseProvider.success(resumen, "Resumen de metas obtenido con éxito.", 200); // Respuesta exitosa
+            // Si la lista tiene resúmenes, retorna éxito con código 200.
+            if (!resumen.isEmpty()) {
+                return ResponseProvider.success(resumen, "Resumen de movimientos obtenido con éxito.", 200);
             } else {
-                return ResponseProvider.error("No hay aportes a metas registrados para este mes.", 404); // No hay datos
+                // Si no hay movimientos, retorna error 404 con mensaje informativo.
+                return ResponseProvider.error("No hay movimientos registrados para este mes.", 404);
             }
 
-        } catch (SQLException e) { // Captura errores SQL
-            return ResponseProvider.error("Error interno al obtener el resumen de metas.", 500); // Error interno
+        } catch (SQLException e) {
+            // Si ocurre un error SQL, retorna error 500 indicando problema interno.
+            return ResponseProvider.error("Error interno al obtener el resumen de movimientos.", 500);
         }
     }
 
+    /**
+     * Método para obtener un resumen de aportes a metas de un usuario en un mes específico.
+     * Responde a solicitudes GET en /dashboard/metas/usuario/{usuario_id}/mes/{mes}.
+     * @param usuario_id Identificador único del usuario.
+     * @param mes Mes para el cual se solicita el resumen (1-12).
+     * @return Response HTTP con la lista de resúmenes en formato tarjeta o un mensaje de error.
+     */
     @GET
-    @Path("/completo/usuario/{usuario_id}/mes/{mes}") // Endpoint para resumen completo: movimientos + metas
-    @Produces(MediaType.APPLICATION_JSON) // Respuesta JSON
-    public Response getResumenCompleto(
-            @PathParam("usuario_id") int usuarioId, // ID usuario
-            @PathParam("mes") int mes) { // Mes consultado
-        List<ResumenCardDTO> resumenCompleto = new ArrayList<>(); // Lista para resumen completo
+    @Path("/metas/usuario/{usuario_id}/mes/{mes}") // Ruta con parámetros para usuario y mes.
+    @Produces(MediaType.APPLICATION_JSON) // Especifica que la respuesta será en formato JSON.
+    public Response getResumenMetas(
+            @PathParam("usuario_id") int usuario_id, // ID del usuario.
+            @PathParam("mes") int mes) { // Mes consultado.
+        List<ResumenCardDTO> resumen = new ArrayList<>(); // Lista para almacenar tarjetas de resumen.
 
         try {
-            // Obtener resumen movimientos
+            // Llama al método DAO para obtener el resumen de metas del usuario en el mes especificado.
+            ResultSet rs = DashboardDao.getResumenMetas(usuario_id, mes);
+
+            // Itera sobre el ResultSet para construir objetos ResumenCardDTO.
+            while (rs.next()) {
+                ResumenCardDTO card = new ResumenCardDTO(
+                    rs.getString("icono"),      // Icono de la meta.
+                    rs.getString("color"),      // Color asociado a la meta.
+                    rs.getString("nombre"),     // Nombre de la meta.
+                    rs.getBigDecimal("total"),  // Total aportado a las metas.
+                    "meta"                      // Identificador del tipo de resumen.
+                );
+                resumen.add(card); // Agrega la tarjeta a la lista.
+            }
+
+            // Cierra el ResultSet para liberar recursos.
+            rs.close();
+
+            // Si la lista tiene resúmenes, retorna éxito con código 200.
+            if (!resumen.isEmpty()) {
+                return ResponseProvider.success(resumen, "Resumen de metas obtenido con éxito.", 200);
+            } else {
+                // Si no hay aportes a metas, retorna error 404 con mensaje informativo.
+                return ResponseProvider.error("No hay aportes a metas registrados para este mes.", 404);
+            }
+
+        } catch (SQLException e) {
+            // Si ocurre un error SQL, retorna error 500 indicando problema interno.
+            return ResponseProvider.error("Error interno al obtener el resumen de metas.", 500);
+        }
+    }
+
+    /**
+     * Método para obtener un resumen completo (movimientos y metas) con balance neto.
+     * Responde a solicitudes GET en /dashboard/completo/usuario/{usuario_id}/mes/{mes}.
+     * @param usuarioId Identificador único del usuario.
+     * @param mes Mes para el cual se solicita el resumen (1-12).
+     * @return Response HTTP con el resumen completo, incluyendo balance, o un mensaje de error.
+     */
+    @GET
+    @Path("/completo/usuario/{usuario_id}/mes/{mes}") // Ruta con parámetros para usuario y mes.
+    @Produces(MediaType.APPLICATION_JSON) // Especifica que la respuesta será en formato JSON.
+    public Response getResumenCompleto(
+            @PathParam("usuario_id") int usuarioId, // ID del usuario.
+            @PathParam("mes") int mes) { // Mes consultado.
+        List<ResumenCardDTO> resumenCompleto = new ArrayList<>(); // Lista para almacenar el resumen completo.
+
+        try {
+            // Obtiene el resumen de movimientos del usuario para el mes especificado.
             ResultSet rsMovimientos = DashboardDao.getResumenMovimientos(usuarioId, mes);
             while (rsMovimientos.next()) {
                 ResumenCardDTO card = new ResumenCardDTO(
-                    rsMovimientos.getString("icono"),
-                    rsMovimientos.getString("color"),
-                    rsMovimientos.getString("nombre"),
-                    rsMovimientos.getBigDecimal("total"),
-                    "movimiento"
+                    rsMovimientos.getString("icono"),      // Icono del tipo de movimiento.
+                    rsMovimientos.getString("color"),      // Color asociado.
+                    rsMovimientos.getString("nombre"),     // Nombre del tipo de movimiento.
+                    rsMovimientos.getBigDecimal("total"),   // Total de movimientos.
+                    "movimiento"                           // Identificador del tipo.
                 );
-                resumenCompleto.add(card);
+                resumenCompleto.add(card); // Agrega la tarjeta a la lista.
             }
-            rsMovimientos.close(); // Cierra ResultSet movimientos
+            rsMovimientos.close(); // Cierra el ResultSet de movimientos.
 
-            // Obtener resumen metas
+            // Obtiene el resumen de metas del usuario para el mes especificado.
             ResultSet rsMetas = DashboardDao.getResumenMetas(usuarioId, mes);
             while (rsMetas.next()) {
                 ResumenCardDTO card = new ResumenCardDTO(
-                    rsMetas.getString("icono"),
-                    rsMetas.getString("color"),
-                    rsMetas.getString("nombre"),
-                    rsMetas.getBigDecimal("total"),
-                    "meta"
+                    rsMetas.getString("icono"),      // Icono de la meta.
+                    rsMetas.getString("color"),      // Color asociado.
+                    rsMetas.getString("nombre"),     // Nombre de la meta.
+                    rsMetas.getBigDecimal("total"),  // Total aportado a metas.
+                    "meta"                           // Identificador del tipo.
                 );
-                resumenCompleto.add(card);
+                resumenCompleto.add(card); // Agrega la tarjeta a la lista.
             }
-            rsMetas.close(); // Cierra ResultSet metas
-            
-            // Calcular balance neto: saldo inicial igual al primer total
-            BigDecimal balance = resumenCompleto.get(0).getTotal();
-            
-            // Resta los totales de los demás para balancear
-            for (int i = 1; i < resumenCompleto.size(); i++) {
-                balance = balance.subtract(resumenCompleto.get(i).getTotal());
-            }
-            
-            // Crear tarjeta resumen para balance neto
-            ResumenCardDTO card = new ResumenCardDTO(
-                    "ri-wallet-3-line", // Icono wallet
-                    "#3367d6",          // Color azul
-                    "Balance",          // Nombre tarjeta
-                    balance,            // Valor balance calculado
-                    "balance"           // Tipo balance
-            );
-            resumenCompleto.add(0, card); // Inserta al inicio la tarjeta balance
+            rsMetas.close(); // Cierra el ResultSet de metas.
 
-            if (!resumenCompleto.isEmpty()) { // Si hay datos
-                return ResponseProvider.success(resumenCompleto, "Resumen completo obtenido con éxito.", 200); // OK
+            // Calcula el balance neto si hay datos en el resumen.
+            if (!resumenCompleto.isEmpty()) {
+                // Toma el primer total como saldo inicial (por ejemplo, ingresos).
+                BigDecimal balance = resumenCompleto.get(0).getTotal();
+
+                // Resta los totales de los demás elementos (gastos y metas) para obtener el balance neto.
+                for (int i = 1; i < resumenCompleto.size(); i++) {
+                    balance = balance.subtract(resumenCompleto.get(i).getTotal());
+                }
+
+                // Crea una tarjeta resumen para el balance neto.
+                ResumenCardDTO card = new ResumenCardDTO(
+                    "ri-wallet-3-line",    // Icono predeterminado para el balance.
+                    "#3367d6",             // Color azul para la tarjeta de balance.
+                    "Balance",             // Nombre de la tarjeta.
+                    balance,               // Valor del balance calculado.
+                    "balance"              // Identificador del tipo.
+                );
+                resumenCompleto.add(0, card); // Inserta la tarjeta de balance al inicio de la lista.
+            }
+
+            // Si la lista tiene resúmenes, retorna éxito con código 200.
+            if (!resumenCompleto.isEmpty()) {
+                return ResponseProvider.success(resumenCompleto, "Resumen completo obtenido con éxito.", 200);
             } else {
-                return ResponseProvider.error("No hay datos registrados para este mes.", 404); // No hay datos
+                // Si no hay datos, retorna error 404 con mensaje informativo.
+                return ResponseProvider.error("No hay datos registrados para este mes.", 404);
             }
 
-        } catch (SQLException e) { // Captura errores SQL
-            return ResponseProvider.error("Error interno al obtener el resumen completo.", 500); // Error interno
+        } catch (SQLException e) {
+            // Si ocurre un error SQL, retorna error 500 indicando problema interno.
+            return ResponseProvider.error("Error interno al obtener el resumen completo.", 500);
         }
     }
-    
+
+    /**
+     * Método para obtener un resumen detallado de movimientos por categoría.
+     * Responde a solicitudes GET en /dashboard/categorias/usuario/{usuario_id}/mes/{mes}/tipo/{tipo_id}.
+     * @param usuario_id Identificador único del usuario.
+     * @param mes Mes para el cual se solicita el resumen (1-12).
+     * @param tipo_id Identificador del tipo de movimiento (por ejemplo, ingresos, gastos).
+     * @return Response HTTP con el resumen detallado de categorías o un mensaje de error.
+     */
     @GET
-    @Path("/categorias/usuario/{usuario_id}/mes/{mes}/tipo/{tipo_id}") // Endpoint resumen detallado categorías
-    @Produces(MediaType.APPLICATION_JSON) // Responde JSON
+    @Path("/categorias/usuario/{usuario_id}/mes/{mes}/tipo/{tipo_id}") // Ruta con parámetros para usuario, mes y tipo.
+    @Produces(MediaType.APPLICATION_JSON) // Especifica que la respuesta será en formato JSON.
     public Response getResumenCategoriasDetalle(
-            @PathParam("usuario_id") int usuario_id, // ID usuario
-            @PathParam("mes") int mes,               // Mes consultado
-            @PathParam("tipo_id") int tipo_id) {    // Tipo movimiento (ingreso, gasto, etc)
+            @PathParam("usuario_id") int usuario_id, // ID del usuario.
+            @PathParam("mes") int mes,              // Mes consultado.
+            @PathParam("tipo_id") int tipo_id) {    // ID del tipo de movimiento.
         try {
-            ResultSet rs = DashboardDao.getResumenCategoriasDetalle(usuario_id, mes, tipo_id); // Consulta detallada
-            List<ResumenCategoriasDTO> lista = new ArrayList<>(); // Lista para DTOs
+            // Llama al método DAO para obtener el resumen detallado de categorías.
+            ResultSet rs = DashboardDao.getResumenCategoriasDetalle(usuario_id, mes, tipo_id);
+            List<ResumenCategoriasDTO> lista = new ArrayList<>(); // Lista para almacenar el resumen.
 
-            while (rs.next()) { // Itera resultados
+            // Itera sobre el ResultSet para construir objetos ResumenCategoriasDTO.
+            while (rs.next()) {
                 ResumenCategoriasDTO dto = new ResumenCategoriasDTO(
-                    rs.getInt("id"),                   // ID categoría
-                    rs.getInt("tipo_movimiento_id"),  // Tipo movimiento
-                    rs.getString("icono"),             // Icono categoría
-                    rs.getString("nombre"),            // Nombre categoría
-                    rs.getString("color"),             // Color
-                    rs.getString("color_bg"),          // Color fondo
-                    rs.getInt("cantidad"),             // Cantidad movimientos
-                    rs.getBigDecimal("total")          // Total monto
+                    rs.getInt("id"),                    // ID de la categoría.
+                    rs.getInt("tipo_movimiento_id"),    // ID del tipo de movimiento.
+                    rs.getString("icono"),              // Icono de la categoría.
+                    rs.getString("nombre"),             // Nombre de la categoría.
+                    rs.getString("color"),              // Color asociado a la categoría.
+                    rs.getString("color_bg"),           // Color de fondo para la categoría.
+                    rs.getInt("cantidad"),              // Cantidad de movimientos en la categoría.
+                    rs.getBigDecimal("total")           // Total acumulado de movimientos.
                 );
-                lista.add(dto); // Añade a lista
+                lista.add(dto); // Agrega el DTO a la lista.
             }
 
-            return ResponseProvider.success(lista, "Resumen completo obtenido con éxito.", 200); // OK con datos
+            // Cierra el ResultSet para liberar recursos.
+            rs.close();
+
+            // Retorna éxito con código 200, incluso si la lista está vacía (respuesta válida).
+            return ResponseProvider.success(lista, "Resumen detallado de categorías obtenido con éxito.", 200);
+
         } catch (SQLException e) {
-            return ResponseProvider.error("Error al obtener resumen detallado de las categorias", 500); // Error DB
+            // Si ocurre un error SQL, retorna error 500 indicando problema interno.
+            return ResponseProvider.error("Error al obtener resumen detallado de categorías", 500);
         }
     }
-    
+
+    /**
+     * Método para obtener un resumen detallado de aportes a metas de un usuario en un mes.
+     * Responde a solicitudes GET en /dashboard/metas/detalle/usuario/{usuario_id}/mes/{mes}.
+     * @param usuarioId Identificador único del usuario.
+     * @param mes Mes para el cual se solicita el resumen (1-12).
+     * @return Response HTTP con el resumen detallado de metas o un mensaje de error.
+     */
     @GET
-    @Path("/metas/detalle/usuario/{usuario_id}/mes/{mes}") // Endpoint resumen detallado metas
-    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/metas/detalle/usuario/{usuario_id}/mes/{mes}") // Ruta con parámetros para usuario y mes.
+    @Produces(MediaType.APPLICATION_JSON) // Especifica que la respuesta será en formato JSON.
     public Response getResumenMetasDetalle(
-            @PathParam("usuario_id") int usuarioId,
-            @PathParam("mes") int mes) {
+            @PathParam("usuario_id") int usuarioId, // ID del usuario.
+            @PathParam("mes") int mes) { // Mes consultado.
         try {
-            ResultSet rs = DashboardDao.getResumenMetasDetalle(usuarioId, mes); // Consulta detallada metas
-            List<ResumenMetasDTO> lista = new ArrayList<>();
+            // Llama al método DAO para obtener el resumen detallado de metas.
+            ResultSet rs = DashboardDao.getResumenMetasDetalle(usuarioId, mes);
+            List<ResumenMetasDTO> lista = new ArrayList<>(); // Lista para almacenar el resumen.
 
-            while (rs.next()) { // Lee cada fila
+            // Itera sobre el ResultSet para construir objetos ResumenMetasDTO.
+            while (rs.next()) {
                 ResumenMetasDTO dto = new ResumenMetasDTO(
-                    rs.getInt("id"),                // ID meta
-                    rs.getInt("tipo_movimiento_id"), // Tipo movimiento (siempre 3)
-                    rs.getString("icono"),          // Icono
-                    rs.getString("color"),          // Color
-                    rs.getString("color_bg"),       // Fondo color
-                    rs.getString("nombre"),         // Nombre meta
-                    rs.getInt("cantidad"),          // Cantidad aportes
-                    rs.getBigDecimal("total")       // Total aportado
+                    rs.getInt("id"),                    // ID de la meta.
+                    rs.getInt("tipo_movimiento_id"),    // ID del tipo de movimiento (generalmente 3 para metas).
+                    rs.getString("icono"),              // Icono de la meta.
+                    rs.getString("color"),              // Color asociado a la meta.
+                    rs.getString("color_bg"),           // Color de fondo para la meta.
+                    rs.getString("nombre"),             // Nombre de la meta.
+                    rs.getInt("cantidad"),              // Cantidad de aportes a la meta.
+                    rs.getBigDecimal("total")           // Total aportado a la meta.
                 );
-                lista.add(dto); // Agrega DTO a lista
+                lista.add(dto); // Agrega el DTO a la lista.
             }
 
-            return ResponseProvider.success(lista, "Resumen completo obtenido con éxito.", 200); // OK con datos
+            // Cierra el ResultSet para liberar recursos.
+            rs.close();
+
+            // Retorna éxito con código 200, incluso si la lista está vacía (respuesta válida).
+            return ResponseProvider.success(lista, "Resumen detallado de metas obtenido con éxito.", 200);
+
         } catch (SQLException e) {
-            return ResponseProvider.error("Error al obtener resumen detallado de metas", 500); // Error DB
+            // Si ocurre un error SQL, retorna error 500 indicando problema interno.
+            return ResponseProvider.error("Error al obtener resumen detallado de metas", 500);
         }
     }
-
 }
