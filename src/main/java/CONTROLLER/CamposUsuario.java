@@ -37,7 +37,7 @@ public class CamposUsuario {
         // Campo: contraseña del usuario
         // - Obligatorio
         // - Mínimo 8, máximo 20 caracteres
-        campos.add(new Campo("contrasena", true, 8, 20, "string", null));
+        campos.add(new Campo("contrasena", false, 8, 20, "string", null));
 
         // Campo: género (ID relacionado con la tabla de géneros)
         // - Obligatorio

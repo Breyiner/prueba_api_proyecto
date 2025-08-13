@@ -157,9 +157,10 @@ public class AportesMetaDao {
             INNER JOIN metas AS m ON m.id = apm.meta_id
             INNER JOIN tipos_movimiento AS tm ON tm.id = 3
             WHERE
-                m.usuario_id = ?       -- filtro usuario
-                AND MONTH(apm.fecha_creacion) = ?  -- filtro mes
-                AND apm.estado_id = 1  -- solo activos
+                m.usuario_id = ?   
+                AND MONTH(apm.fecha_creacion) = ? 
+                AND apm.estado_id = 1
+                AND m.estado_id = 1
             ORDER BY
                 apm.id DESC;
         """;
@@ -193,7 +194,7 @@ public class AportesMetaDao {
             INNER JOIN tipos_movimiento tm on tm.id = 3
             WHERE 
                 m.usuario_id = ?
-                AND DATE(m.fecha_creacion) = ?
+                AND DATE(apm.fecha_creacion) = ?
                 AND m.estado_id = 1
                 AND apm.estado_id = 1
             ORDER BY
