@@ -159,8 +159,8 @@ public class AportesMetaDao {
             WHERE
                 m.usuario_id = ?   
                 AND MONTH(apm.fecha_creacion) = ? 
-                AND apm.estado_id = 1
                 AND m.estado_id = 1
+                AND apm.estado_id = 1
             ORDER BY
                 apm.id DESC;
         """;

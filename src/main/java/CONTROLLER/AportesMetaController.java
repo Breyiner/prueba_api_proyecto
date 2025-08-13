@@ -316,7 +316,7 @@ public class AportesMetaController { // Declaramos la clase pública del control
     @GET // Método GET
     @Path("resumidos/usuario/{usuario_id}/fecha/{fecha}") // Ruta con usuario y fecha
     @Produces(MediaType.APPLICATION_JSON) // Respuesta JSON
-    public static Response getAportesResumidosByMeta( // Método por fecha
+    public static Response getAportesResumidosByDate( // Método por fecha
         @PathParam("usuario_id") int usuario_id, // Usuario desde URL
         @PathParam("fecha") String fecha) // Fecha desde URL como String
     { // Inicio método
